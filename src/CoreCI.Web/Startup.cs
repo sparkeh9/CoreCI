@@ -1,7 +1,12 @@
 ﻿namespace CoreCI.Web
 {
+    using System;
+    using FluentValidation.AspNetCore;
+    using Infrastructure.Bootstrapping;
+    using Infrastructure.Config;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -21,10 +26,17 @@
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices( IServiceCollection services )
+        public IServiceProvider ConfigureServices( IServiceCollection services )
         {
-            // Add framework services.
-            services.AddMvc();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            services.AddRouting( RouteConfig.ConfigureOptions );
+            services.AddAuthorization( AuthorisationConfig.ConfigureSecurityPolicies );
+            services.AddMvc( AuthorisationConfig.WithAuthenticateByDefaultPolicy )
+                    .AddFluentValidation( ValidationConfig.ConfigureValidation )
+                    ;
+
+            return AutofacContainerBootstrapper.ConfigureServices( services );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,14 +50,9 @@
             else
                 app.UseExceptionHandler( "/Home/Error" );
 
+            app.UseCookieAuthentication( AuthorisationConfig.ConfigureAuthorisation );
             app.UseStaticFiles();
-
-            app.UseMvc( routes =>
-            {
-                routes.MapRoute(
-                                "default",
-                                "{controller=Home}/{action=Index}/{id?}" );
-            } );
+            app.UseMvc( RouteConfig.ConfigureRoutes );
         }
     }
 }

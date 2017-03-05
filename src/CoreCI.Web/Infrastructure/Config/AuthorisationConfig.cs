@@ -15,7 +15,7 @@
             AccessDeniedPath = new PathString( "/account/login" ),
             AutomaticAuthenticate = true,
             AutomaticChallenge = true,
-            CookieName = "BB.ClientArea.Cookie"
+            CookieName = "CoreCI.Cookie"
         };
 
         public static void WithAuthenticateByDefaultPolicy( MvcOptions config )
@@ -29,7 +29,7 @@
 
         public static void ConfigureSecurityPolicies( AuthorizationOptions config )
         {
-//            config.AddPolicy( "AdminOnlyPolicy", policy => policy.RequireRole( Role.Admin.ToString() ) );
+            config.AddPolicy( "AdminOnlyPolicy", policy => policy.RequireRole( "Admin" ) );
 //            config.AddPolicy( "ClientOnly", policy => policy.RequireRole( Role.Client.ToString() ) );
         }
     }
