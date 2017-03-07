@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="lib\**" />
+    <EmbeddedResource Remove="lib\**" />
+    <None Remove="lib\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Docker.DotNet" Version="2.124.3" />
+    <PackageReference Include="Docker.DotNet.BasicAuth" Version="2.124.3" />
+    <PackageReference Include="Docker.DotNet.X509" Version="2.124.3" />
+  </ItemGroup>
+
+</Project>
