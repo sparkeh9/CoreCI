@@ -1,8 +1,8 @@
-﻿namespace CoreCI.Kernel
+﻿namespace CoreCI.Kernel.Models
 {
     using System.Collections.Generic;
 
-    public class BuildStep
+    public class Step
     {
         public string Name { get; set; }
         public string Image { get; set; }
