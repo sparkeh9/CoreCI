@@ -34,17 +34,30 @@
                 }, null );
 
                 var container = await client.Containers.CreateContainerAsync( new CreateContainerParameters( new Config
-                {
-                    Image = "microsoft/dotnet:1.1.0-sdk-projectjson",
-                    AttachStdout = true,
-                    AttachStderr = true,
-                    Entrypoint = new List<string>
-                    {
-                        "/bin/bash",
-                        "-c",
-                        "echo test && sleep 60 && echo exiting"
-                    }
-                } ) );
+                                                                              {
+                                                                                  Image = "microsoft/dotnet:1.1.0-sdk-projectjson",
+                                                                                  AttachStdout = true,
+                                                                                  AttachStderr = true,
+                                                                                  Entrypoint = new List<string>
+                                                                                  {
+                                                                                      "/bin/bash",
+                                                                                      "-c",
+                                                                                      "echo test && sleep 60 && echo exiting"
+                                                                                  },
+                                                                                  Volumes = new Dictionary<string, object>
+                                                                                  {
+                                                                                      { "/tmp", new { } }
+                                                                                  },
+                                                                              } )
+                                                                              {
+                                                                                  HostConfig = new HostConfig
+                                                                                  {
+                                                                                      Binds = new List<string>
+                                                                                      {
+                                                                                          "/tmp:/tmp"
+                                                                                      }
+                                                                                  }
+                                                                              } );
 
                 containerId = container.ID;
                 await client.Containers.StartContainerAsync( container.ID.Substring( 0, 12 ), new ContainerStartParameters() );

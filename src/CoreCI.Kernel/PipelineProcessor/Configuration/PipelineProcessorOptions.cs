@@ -1,4 +1,4 @@
-﻿namespace CoreCI.Kernel.Configuration
+﻿namespace CoreCI.Kernel.PipelineProcessor.Configuration
 {
     public class PipelineProcessorOptions
     {

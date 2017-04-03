@@ -1,4 +1,4 @@
-﻿namespace CoreCI.Kernel.Services
+﻿namespace CoreCI.Kernel.PipelineProcessor
 {
     using System;
     using System.IO;
