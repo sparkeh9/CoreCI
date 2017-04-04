@@ -40,6 +40,7 @@
                     }
                 }
             }, ctx );
+
             return true;
         }
     }

@@ -4,11 +4,10 @@
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration;
     using Infrastructure.Helpers;
     using Microsoft.Extensions.Options;
     using Models;
-    using Services;
+    using PipelineProcessor;
     using Shouldly;
     using Xunit;
 
