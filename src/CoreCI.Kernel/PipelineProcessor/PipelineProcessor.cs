@@ -17,12 +17,13 @@
 
     public class PipelineProcessor : IPipelineProcessor
     {
+        private const int StreamBufferSize = 81920;
         private readonly Stream stdInStream;
         private readonly Stream stdOutStream;
         private readonly Stream errStream;
         private readonly PipelineProcessorOptions options;
         private readonly DockerClient dockerClient;
-        private List<string> startedContainers = new List<string>();
+        private readonly List<string> startedContainers = new List<string>();
 
         public PipelineProcessor( IOptions<PipelineProcessorOptions> configuration, Stream stdInStream = null, Stream stdOutStream = null, Stream errStream = null )
         {
@@ -61,19 +62,19 @@
                     startedContainers.Add( container.ContainerId );
 
                     await dockerClient.Containers.StartContainerAsync( container.ContainerId, new ContainerStartParameters() );
-                    var stdOut = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId, new ContainerLogsParameters
+                    var stdOutLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId, new ContainerLogsParameters
                     {
                         ShowStdout = true
                     }, ctx );
 
-                    var errors = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId, new ContainerLogsParameters
+                    var errorLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId, new ContainerLogsParameters
                     {
                         ShowStderr = true
                     }, ctx );
 
                     await dockerClient.Containers.WaitContainerAsync( container.ContainerId, ctx );
-                    await stdOut.CopyToAsync( stdOutStream, 81920, ctx );
-                    await errors.CopyToAsync( errStream, 81920, ctx );
+                    await stdOutLogs.CopyToAsync( stdOutStream, StreamBufferSize, ctx );
+                    await errorLogs.CopyToAsync( errStream, StreamBufferSize, ctx );
                 }
 
                 return result;
