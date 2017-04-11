@@ -5,7 +5,7 @@
 
     public static class StringExtensions
     {
-        public static string ConvertToString( this Stream stream )
+        public static string DumpToString( this Stream stream )
         {
             stream.Position = 0;
             using ( var reader = new StreamReader( stream, Encoding.UTF8 ) )

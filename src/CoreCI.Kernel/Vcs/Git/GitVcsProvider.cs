@@ -25,7 +25,11 @@
                     new Step
                     {
                         Name = "CloneGitRepository",
-                        Image = "plugins/git",
+                        Image = new Image
+                        {
+                            Parent = "plugins/git",
+                            Tag = "latest"
+                        },
                         EnvironmentVariables = new Dictionary<string, string>
                         {
                             { "DRONE_WORKSPACE", "/checkout" },

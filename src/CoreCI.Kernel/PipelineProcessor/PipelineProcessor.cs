@@ -17,11 +17,19 @@
 
     public class PipelineProcessor : IPipelineProcessor
     {
+        private readonly Stream stdInStream;
+        private readonly Stream stdOutStream;
+        private readonly Stream errStream;
         private readonly PipelineProcessorOptions options;
         private readonly DockerClient dockerClient;
+        private List<string> startedContainers = new List<string>();
 
-        public PipelineProcessor( IOptions<PipelineProcessorOptions> configuration )
+        public PipelineProcessor( IOptions<PipelineProcessorOptions> configuration, Stream stdInStream = null, Stream stdOutStream = null, Stream errStream = null )
         {
+            this.stdInStream = stdInStream ?? new MemoryStream();
+            this.stdOutStream = stdOutStream ?? new MemoryStream();
+            this.errStream = errStream ?? new MemoryStream();
+
             options = configuration.Value;
 
             var credentials = GetDockerRemoteApiCredentials();
@@ -31,51 +39,110 @@
 
         public async Task<PipelineProcessorResult> ProcessAsync( Pipeline pipeline, CancellationToken ctx = default( CancellationToken ) )
         {
-            await Task.Delay( 0, ctx );
-            ctx.ThrowIfCancellationRequested();
-
-            var workspaceIdentifier = Guid.NewGuid();
-            var result = new PipelineProcessorResult
+            try
             {
-                Identitifer = workspaceIdentifier,
-                WorkspacePath = GetWorkspacePath( workspaceIdentifier )
-            };
+                ctx.ThrowIfCancellationRequested();
 
+                var workspaceIdentifier = Guid.NewGuid();
+                var result = new PipelineProcessorResult
+                {
+                    Identitifer = workspaceIdentifier,
+                    WorkspacePath = GetWorkspacePath( workspaceIdentifier )
+                };
 
-            var steps = pipeline.Steps.ToList();
+                Directory.CreateDirectory( result.WorkspacePath );
+
+                var steps = pipeline.Steps.ToList();
+                var containers = await GetStepContainers( steps );
+
+                foreach ( var container in containers )
+                {
+                    ctx.ThrowIfCancellationRequested();
+                    startedContainers.Add( container.ContainerId );
+
+                    await dockerClient.Containers.StartContainerAsync( container.ContainerId, new ContainerStartParameters() );
+                    var stdOut = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId, new ContainerLogsParameters
+                    {
+                        ShowStdout = true
+                    }, ctx );
+
+                    var errors = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId, new ContainerLogsParameters
+                    {
+                        ShowStderr = true
+                    }, ctx );
+
+                    await dockerClient.Containers.WaitContainerAsync( container.ContainerId, ctx );
+                    await stdOut.CopyToAsync( stdOutStream, 81920, ctx );
+                    await errors.CopyToAsync( errStream, 81920, ctx );
+                }
+
+                return result;
+            }
+            catch ( Exception e )
+            {
+                await errStream.WriteLineAsync( e.Message );
+                throw;
+            }
+            finally
+            {
+                await stdOutStream.WriteLineAsync( "Cleaning up" );
+                foreach ( string containerId in startedContainers )
+                {
+                    await dockerClient.Containers.StopContainerAsync( containerId, new ContainerStopParameters(), CancellationToken.None );
+                    await dockerClient.Containers.RemoveContainerAsync( containerId, new ContainerRemoveParameters() );
+                }
+            }
+        }
+
+        private async Task<IEnumerable<StepContainer>> GetStepContainers( IReadOnlyCollection<Step> steps )
+        {
+            await stdOutStream.WriteLineAsync( "Generating steps" );
+            await PullAllRequiredImagesAsync( steps );
+
+            var containerResponses = new List<StepContainer>();
+
+            foreach ( var step in steps )
+            {
+                await stdOutStream.WriteLineAsync( $"- {step.Name} ({step.Image})" );
+                var containerResponse = await dockerClient.Containers
+                                                          .CreateContainerAsync( new CreateContainerParameters( new Config
+                                                                                 {
+                                                                                     Image = step.Image.ToString(),
+                                                                                     AttachStdout = true,
+                                                                                     AttachStderr = true,
+                                                                                     Entrypoint = step?.Commands.ToList(),
+//                                                                                     Volumes = step != null
+//                                                                                         ? step.Volumes?.ToDictionary( x => x.Key, x => new object() )
+//                                                                                         : new Dictionary<string, object>()
+                                                                                 } )
+                                                                                 {
+                                                                                     HostConfig = new HostConfig
+                                                                                     {
+//                                                                                         Binds = step != null
+//                                                                                             ? step?.Volumes
+//                                                                                                   .Select( x => $"{x.Key}:{x.Value}" )
+//                                                                                                   .ToList()
+//                                                                                             : new List<string>()
+                                                                                     }
+                                                                                 } );
+
+                containerResponses.Add( new StepContainer
+                {
+                    Step = step,
+                    ContainerId = containerResponse.ID.ToShortUuid()
+                } );
+            }
+            return containerResponses;
+        }
+
+        private async Task PullAllRequiredImagesAsync( IEnumerable<Step> steps )
+        {
             await Task.WhenAll( steps.Select( step => dockerClient.Images.PullImageAsync( new ImagesPullParameters
             {
                 All = false,
-                Parent = step.Image,
-                Tag = step.Image
+                Parent = step.Image.Parent,
+                Tag = step.Image.Tag
             }, null ) ) );
-
-
-            foreach ( var step in pipeline.Steps )
-            {
-                var res = await dockerClient.Containers
-                                  .CreateContainerAsync( new CreateContainerParameters( new Config
-                                                         {
-                                                             Image = step.Image,
-                                                             AttachStdout = true,
-                                                             AttachStderr = true,
-                                                             Entrypoint = step.Commands.ToList(),
-                                                             Volumes = step.Volumes.ToDictionary( x => x.Key, x => new object() )
-                                                         } )
-                                                         {
-                                                             HostConfig = new HostConfig
-                                                             {
-                                                                 Binds = step.Volumes
-                                                                             .Select( x => $"{x.Key}:{x.Value}" )
-                                                                             .ToList()
-                                                             }
-                                                         } );
-            }
-
-
-            Directory.CreateDirectory( result.WorkspacePath );
-
-            return result;
         }
 
         public async Task CleanupWorkspaceAsync( Guid id )
@@ -90,7 +157,6 @@
             return Path.Combine( options.Workspace, id.ToString( "N" ) );
         }
 
-
         private Credentials GetDockerRemoteApiCredentials()
         {
             if ( !options.PfxPath.IsNullOrWhiteSpace() )
@@ -102,6 +168,12 @@
                 return new BasicAuthCredentials( options.BasicAuth.Username, options.BasicAuth.Password, options.BasicAuth.Tls );
 
             return new AnonymousCredentials();
+        }
+
+        private class StepContainer
+        {
+            public Step Step { get; set; }
+            public string ContainerId { get; set; }
         }
     }
 }

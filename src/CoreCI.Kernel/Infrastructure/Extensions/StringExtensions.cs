@@ -4,5 +4,7 @@
     {
         public static bool IsNullOrEmpty( this string operand ) => string.IsNullOrEmpty( operand );
         public static bool IsNullOrWhiteSpace( this string operand ) => string.IsNullOrWhiteSpace( operand );
+        public static string ToShortUuid(this string operand) =>  operand.Substring( 0,12 );
+
     }
 }

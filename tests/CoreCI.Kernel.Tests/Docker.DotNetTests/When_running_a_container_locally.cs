@@ -15,7 +15,7 @@
 
     public class When_running_a_container_locally
     {
-        [ Fact ]
+        [ Fact(Skip = "For reference only") ]
         public async Task Should_run_container()
         {
             string containerId = string.Empty;
