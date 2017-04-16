@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCI.Web", "src\CoreCI.Web\CoreCI.Web.csproj", "{E732F601-B7D8-46F6-952C-C5261493A719}"
 EndProject
@@ -16,6 +16,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2BDAB683-B9CC-459E-B5C3-B3FCB91B5F64}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCI.Kernel.Tests", "tests\CoreCI.Kernel.Tests\CoreCI.Kernel.Tests.csproj", "{ABE5E0D6-101A-4426-9BD2-41AD697FE975}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{86930EA4-3486-4B29-9651-5DD9F0457033}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\SetEnv.Windows.DockerToolBox.ps1 = scripts\SetEnv.Windows.DockerToolBox.ps1
+		scripts\SetEnv.Windows.NamedPipe.ps1 = scripts\SetEnv.Windows.NamedPipe.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,5 +75,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{ABE5E0D6-101A-4426-9BD2-41AD697FE975} = {2BDAB683-B9CC-459E-B5C3-B3FCB91B5F64}
+		{86930EA4-3486-4B29-9651-5DD9F0457033} = {1A853FB2-4679-48BE-9064-30D0EA0BF1D8}
 	EndGlobalSection
 EndGlobal

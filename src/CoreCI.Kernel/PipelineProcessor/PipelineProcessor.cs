@@ -34,7 +34,7 @@
             options = configuration.Value;
 
             var credentials = GetDockerRemoteApiCredentials();
-            var config = new DockerClientConfiguration( new Uri( "http://192.168.99.100:2376" ), credentials );
+            var config = new DockerClientConfiguration( new Uri( options.RemoteEndpoint ), credentials );
             dockerClient = config.CreateClient();
         }
 
@@ -53,8 +53,8 @@
 
                 Directory.CreateDirectory( result.WorkspacePath );
 
-                var steps = pipeline.Steps.ToList();
-                var containers = await GetStepContainers( steps );
+                var steps = pipeline.Steps?.ToList();
+                var containers = await GetStepContainersAsync( steps, result.WorkspacePath );
 
                 foreach ( var container in containers )
                 {
@@ -95,8 +95,17 @@
             }
         }
 
-        private async Task<IEnumerable<StepContainer>> GetStepContainers( IReadOnlyCollection<Step> steps )
+        /// <summary>
+        /// Generates a list of container IDs representing each step.
+        /// </summary>
+        /// <param name="steps"></param>
+        /// <param name="workspacePath"></param>
+        /// <returns></returns>
+        private async Task<IEnumerable<StepContainer>> GetStepContainersAsync( IReadOnlyCollection<Step> steps, string workspacePath )
         {
+            if ( steps == null || !steps.Any() )
+                return Enumerable.Empty<StepContainer>();
+
             await stdOutStream.WriteLineAsync( "Generating steps" );
             await PullAllRequiredImagesAsync( steps );
 
@@ -112,18 +121,12 @@
                                                                                      AttachStdout = true,
                                                                                      AttachStderr = true,
                                                                                      Entrypoint = step?.Commands.ToList(),
-//                                                                                     Volumes = step != null
-//                                                                                         ? step.Volumes?.ToDictionary( x => x.Key, x => new object() )
-//                                                                                         : new Dictionary<string, object>()
+                                                                                     Volumes = step.ExtractVolumes( workspacePath )
                                                                                  } )
                                                                                  {
                                                                                      HostConfig = new HostConfig
                                                                                      {
-//                                                                                         Binds = step != null
-//                                                                                             ? step?.Volumes
-//                                                                                                   .Select( x => $"{x.Key}:{x.Value}" )
-//                                                                                                   .ToList()
-//                                                                                             : new List<string>()
+                                                                                         Binds = step.ExtractBindings( workspacePath ).ToList()
                                                                                      }
                                                                                  } );
 
@@ -161,7 +164,22 @@
         private Credentials GetDockerRemoteApiCredentials()
         {
             if ( !options.PfxPath.IsNullOrWhiteSpace() )
-                return new CertificateCredentials( new X509Certificate2( options.PfxPath ) );
+            {
+                if ( options.PfxPassword.IsNullOrEmpty() )
+                {
+                    return new CertificateCredentials(new X509Certificate2(options.PfxPath));
+                }
+                return new CertificateCredentials(new X509Certificate2(options.PfxPath, options.PfxPassword));
+            }
+
+            if (options.PfxBytes != null && options.PfxBytes.Length > 0)
+            {
+                if (options.PfxPassword.IsNullOrEmpty())
+                {
+                    return new CertificateCredentials(new X509Certificate2(options.PfxBytes));
+                }
+                return new CertificateCredentials(new X509Certificate2(options.PfxBytes, options.PfxPassword));
+            }
 
             if ( options.BasicAuth != null &&
                  !options.BasicAuth.Username.IsNullOrWhiteSpace() &&

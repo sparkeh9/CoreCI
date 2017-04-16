@@ -2,6 +2,8 @@
 {
     public class PipelineProcessorOptions
     {
+        public byte[] PfxBytes { get; set; }
+        public string PfxPassword { get; set; }
         public string PfxPath { get; set; }
         public string RemoteEndpoint { get; set; }
         public string Workspace { get; set; }

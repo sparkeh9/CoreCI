@@ -4,6 +4,9 @@
 
     public static class ResourceHelpers
     {
-        public static string GetTempFilePath() => Path.GetTempPath();
+        public static string GetTempFilePath()
+        {
+            return Path.GetTempPath();
+        }
     }
 }

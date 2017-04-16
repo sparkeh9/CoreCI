@@ -37,10 +37,18 @@
                             { "DRONE_COMMIT_SHA", configuration.Sha },
                             { "DRONE_COMMIT_REF", configuration.Ref },
                         },
-                        Volumes = new Dictionary<string, string>
+                        Volumes = new List<VolumeBinding>
                         {
-                            { configuration.WorkspacePath, "/checkout" }
+                            new VolumeBinding()
+                            {
+                                LocalPath = configuration.WorkspacePath,
+                                RemotePath = "/checkout"
+                            }
                         }
+//                        Volumes = new Dictionary<string, string>
+//                        {
+//                            { configuration.WorkspacePath, "/checkout" }
+//                        }
                     }
                 }
             }, ctx );
