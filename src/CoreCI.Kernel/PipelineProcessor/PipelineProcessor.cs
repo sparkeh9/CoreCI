@@ -38,23 +38,34 @@
             dockerClient = config.CreateClient();
         }
 
-        public async Task<PipelineProcessorResult> ProcessAsync( Pipeline pipeline, CancellationToken ctx = default( CancellationToken ) )
+        public async Task<PipelineProcessorResult> ProcessAsync( Pipeline pipeline, CancellationToken ctx = default(CancellationToken) )
         {
             try
             {
                 ctx.ThrowIfCancellationRequested();
+                PipelineProcessorResult result;
 
-                var workspaceIdentifier = Guid.NewGuid();
-                var result = new PipelineProcessorResult
+                if ( !pipeline.WorkspacePath.IsNullOrWhiteSpace() )
                 {
-                    Identitifer = workspaceIdentifier,
-                    WorkspacePath = GetWorkspacePath( workspaceIdentifier )
-                };
+                    result = new PipelineProcessorResult
+                    {
+                        WorkspacePath = pipeline.WorkspacePath
+                    };
+                }
+                else
+                {
+                    var workspaceIdentifier = Guid.NewGuid();
+                    result = new PipelineProcessorResult
+                    {
+                        Identitifer = workspaceIdentifier,
+                        WorkspacePath = GetWorkspacePath(workspaceIdentifier)
+                    };
+                }
 
                 Directory.CreateDirectory( result.WorkspacePath );
 
                 var steps = pipeline.Steps?.ToList();
-                var containers = await GetStepContainersAsync( steps, result.WorkspacePath.ToTranslatedPath());
+                var containers = await GetStepContainersAsync( steps, result.WorkspacePath.ToTranslatedPath() );
 
                 foreach ( var container in containers )
                 {
@@ -62,15 +73,17 @@
                     startedContainers.Add( container.ContainerId );
 
                     await dockerClient.Containers.StartContainerAsync( container.ContainerId, new ContainerStartParameters() );
-                    var stdOutLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId, new ContainerLogsParameters
-                    {
-                        ShowStdout = true
-                    }, ctx );
+                    var stdOutLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId,
+                        new ContainerLogsParameters
+                        {
+                            ShowStdout = true
+                        }, ctx );
 
-                    var errorLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId, new ContainerLogsParameters
-                    {
-                        ShowStderr = true
-                    }, ctx );
+                    var errorLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId,
+                        new ContainerLogsParameters
+                        {
+                            ShowStderr = true
+                        }, ctx );
 
                     await dockerClient.Containers.WaitContainerAsync( container.ContainerId, ctx );
                     await stdOutLogs.CopyToAsync( stdOutStream, StreamBufferSize, ctx );
@@ -101,7 +114,8 @@
         /// <param name="steps"></param>
         /// <param name="workspacePath"></param>
         /// <returns></returns>
-        private async Task<IEnumerable<StepContainer>> GetStepContainersAsync( IReadOnlyCollection<Step> steps, string workspacePath )
+        private async Task<IEnumerable<StepContainer>> GetStepContainersAsync( IReadOnlyCollection<Step> steps,
+            string workspacePath )
         {
             if ( steps == null || !steps.Any() )
                 return Enumerable.Empty<StepContainer>();
@@ -115,25 +129,31 @@
             {
                 await stdOutStream.WriteLineAsync( $"- {step.Name} ({step.Image})" );
                 var containerResponse = await dockerClient.Containers
-                                                          .CreateContainerAsync( new CreateContainerParameters( new Config
-                                                                                 {
-                                                                                     Image = step.Image.ToString(),
-                                                                                     AttachStdout = true,
-                                                                                     AttachStderr = true,
-                                                                                     Entrypoint = step?.Commands.ToList(),
-                                                                                     Volumes = step.ExtractVolumes( workspacePath )
-                                                                                 } )
-                                                                                 {
-                                                                                     HostConfig = new HostConfig
-                                                                                     {
-                                                                                         Binds = step.ExtractBindings( workspacePath ).ToList()
-                                                                                     }
-                                                                                 } );
+                                                          .CreateContainerAsync( new CreateContainerParameters( new
+                                                              Config
+                                                              {
+                                                                  Image = step.Image
+                                                                              .ToString(),
+                                                                  AttachStdout = true,
+                                                                  AttachStderr = true,
+                                                                  Entrypoint = step.Commands !=  null 
+                                                                        ? step.Commands.ToList()
+                                                                        : null,
+                                                                  Env = step.EnvironmentVariables.Select( x => $"{x.Key}={x.Value}" ).ToList(),
+                                                                  Volumes = step.ExtractVolumes( workspacePath ),
+                                                                  
+                                                              } )
+                                                          {
+                                                              HostConfig = new HostConfig
+                                                              {
+                                                                  Binds = step.ExtractBindings( workspacePath ).ToList()
+                                                              }
+                                                          } );
 
                 containerResponses.Add( new StepContainer
                 {
                     Step = step,
-                    ContainerId = containerResponse.ID//.ToShortUuid()
+                    ContainerId = containerResponse.ID //.ToShortUuid()
                 } );
             }
             return containerResponses;
@@ -144,7 +164,8 @@
             await Task.WhenAll( steps.Select( step => dockerClient.Images.PullImageAsync( new ImagesPullParameters
             {
                 All = false,
-                Parent = step.Image.Parent,
+                Parent =
+                    step.Image.Parent,
                 Tag = step.Image.Tag
             }, null ) ) );
         }
@@ -163,32 +184,32 @@
 
         private Credentials GetDockerRemoteApiCredentials()
         {
-            var uri = new Uri(options.RemoteEndpoint);
+            var uri = new Uri( options.RemoteEndpoint );
 
-            if (uri.Scheme == "npipe")
+            if ( uri.Scheme == "npipe" )
                 return new AnonymousCredentials();
 
             if ( !options.PfxPath.IsNullOrWhiteSpace() )
             {
                 if ( options.PfxPassword.IsNullOrEmpty() )
                 {
-                    return new CertificateCredentials(new X509Certificate2(options.PfxPath));
+                    return new CertificateCredentials( new X509Certificate2( options.PfxPath ) );
                 }
-                return new CertificateCredentials(new X509Certificate2(options.PfxPath, options.PfxPassword));
+                return new CertificateCredentials( new X509Certificate2( options.PfxPath, options.PfxPassword ) );
             }
 
-            if (options.PfxBytes != null && options.PfxBytes.Length > 0)
+            if ( options.PfxBytes != null && options.PfxBytes.Length > 0 )
             {
-                if (options.PfxPassword.IsNullOrEmpty())
+                if ( options.PfxPassword.IsNullOrEmpty() )
                 {
-                    return new CertificateCredentials(new X509Certificate2(options.PfxBytes));
+                    return new CertificateCredentials( new X509Certificate2( options.PfxBytes ) );
                 }
-                return new CertificateCredentials(new X509Certificate2(options.PfxBytes, options.PfxPassword));
+                return new CertificateCredentials( new X509Certificate2( options.PfxBytes, options.PfxPassword ) );
             }
 
             if ( options.BasicAuth != null &&
-                 !options.BasicAuth.Username.IsNullOrWhiteSpace() &&
-                 !options.BasicAuth.Password.IsNullOrWhiteSpace() )
+                !options.BasicAuth.Username.IsNullOrWhiteSpace() &&
+                !options.BasicAuth.Password.IsNullOrWhiteSpace() )
                 return new BasicAuthCredentials( options.BasicAuth.Username, options.BasicAuth.Password, options.BasicAuth.Tls );
 
             return new AnonymousCredentials();

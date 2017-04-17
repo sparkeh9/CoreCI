@@ -32,23 +32,12 @@
                         },
                         EnvironmentVariables = new Dictionary<string, string>
                         {
-                            { "DRONE_WORKSPACE", "/checkout" },
+                            { "DRONE_WORKSPACE", "/workspace" },
+                            { "DRONE_BUILD_EVENT", "push" },
                             { "DRONE_REMOTE_URL", configuration.RemoteUrl },
                             { "DRONE_COMMIT_SHA", configuration.Sha },
                             { "DRONE_COMMIT_REF", configuration.Ref },
-                        },
-                        Volumes = new List<VolumeBinding>
-                        {
-                            new VolumeBinding()
-                            {
-                                LocalPath = configuration.WorkspacePath,
-                                RemotePath = "/checkout"
-                            }
                         }
-//                        Volumes = new Dictionary<string, string>
-//                        {
-//                            { configuration.WorkspacePath, "/checkout" }
-//                        }
                     }
                 }
             }, ctx );

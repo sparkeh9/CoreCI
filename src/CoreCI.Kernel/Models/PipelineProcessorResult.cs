@@ -4,7 +4,7 @@
 
     public class PipelineProcessorResult
     {
-        public Guid Identitifer { get; set; }
+        public Guid? Identitifer { get; set; }
         public string WorkspacePath { get; set; }
     }
 }
