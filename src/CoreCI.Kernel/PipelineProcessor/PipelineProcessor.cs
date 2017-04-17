@@ -54,7 +54,7 @@
                 Directory.CreateDirectory( result.WorkspacePath );
 
                 var steps = pipeline.Steps?.ToList();
-                var containers = await GetStepContainersAsync( steps, result.WorkspacePath );
+                var containers = await GetStepContainersAsync( steps, result.WorkspacePath.ToTranslatedPath());
 
                 foreach ( var container in containers )
                 {
@@ -133,7 +133,7 @@
                 containerResponses.Add( new StepContainer
                 {
                     Step = step,
-                    ContainerId = containerResponse.ID.ToShortUuid()
+                    ContainerId = containerResponse.ID//.ToShortUuid()
                 } );
             }
             return containerResponses;
@@ -163,6 +163,11 @@
 
         private Credentials GetDockerRemoteApiCredentials()
         {
+            var uri = new Uri(options.RemoteEndpoint);
+
+            if (uri.Scheme == "npipe")
+                return new AnonymousCredentials();
+
             if ( !options.PfxPath.IsNullOrWhiteSpace() )
             {
                 if ( options.PfxPassword.IsNullOrEmpty() )

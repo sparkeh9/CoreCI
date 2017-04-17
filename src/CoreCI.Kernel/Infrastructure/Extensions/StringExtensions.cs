@@ -6,5 +6,9 @@
         public static bool IsNullOrWhiteSpace( this string operand ) => string.IsNullOrWhiteSpace( operand );
         public static string ToShortUuid(this string operand) =>  operand.Substring( 0,12 );
 
+        public static string ToTranslatedPath(this string operand)
+        {
+            return operand.Replace('\\', '/');
+        }
     }
 }

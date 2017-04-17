@@ -10,8 +10,7 @@ openssl pkcs12 -export -inkey key.pem -in cert.pem -out key.pfx
 
 certutil -f -user -importpfx ca.pfx
 
-[Environment]::SetEnvironmentVariable("DOCKER_HOST", "http://192.168.99.100:2376", [System.EnvironmentVariableTarget]::User)
-[Environment]::SetEnvironmentVariable("DOCKER_CERT_PATH", $certificatePath, [System.EnvironmentVariableTarget]::User)
-[Environment]::SetEnvironmentVariable("DOCKER_TLS_VERIFY ", "0", [System.EnvironmentVariableTarget]::User)
+[Environment]::SetEnvironmentVariable("CORECI_DOCKER_HOST", "http://192.168.99.100:2376", [System.EnvironmentVariableTarget]::User)
+[Environment]::SetEnvironmentVariable("CORECI_DOCKER_CERT_PATH", $certificatePath, [System.EnvironmentVariableTarget]::User)
 
 Pop-Location
