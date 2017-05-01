@@ -6,17 +6,22 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Models;
-    using Infrastructure.Extensions;
     using Infrastructure.Helpers;
+    using Kernel.Infrastructure.Extensions;
     using Shouldly;
     using Xunit;
+    using Xunit.Abstractions;
 
-
-    public class When_initiating_a_pipeline_process
+    public class When_initiating_a_pipeline_process : TestBase
     {
-        private static PipelineProcessor.PipelineProcessor SystemUnderTest( Stream inStream = null, Stream outStream = null, Stream errStream = null )
+        public When_initiating_a_pipeline_process( ITestOutputHelper outputHelper ) : base( outputHelper ) { }
+
+        private PipelineProcessor.PipelineProcessor SystemUnderTest( Stream inStream = null, Stream outStream = null, Stream errStream = null )
         {
-            return new PipelineProcessor.PipelineProcessor( PipelineProcessorOptionsHelper.GenerateOptionsForTest(), inStream, outStream, errStream );
+            return new PipelineProcessor.PipelineProcessor( PipelineProcessorOptionsHelper.GenerateOptionsForTest(), inStream, outStream, errStream )
+            {
+                Logger = this.Logger
+            };
         }
 
         [ Fact ]
@@ -36,11 +41,53 @@
             var sut = SystemUnderTest();
             try
             {
-                var result = await sut.ProcessAsync( new Pipeline() );
+                var result = await sut.ProcessAsync( new Pipeline
+                {
+                    Steps = new List<Step>
+                    {
+                        new Step
+                        {
+                            Name = "DummyStep",
+                            Image = TestStepHelper.BasicAlpineImage(),
+                            Commands = TestStepHelper.DummyCommand()
+                        }
+                    }
+                } );
                 guid = result.Identitifer.GetValueOrDefault();
                 result.WorkspacePath.ShouldNotBeNullOrWhiteSpace();
 
                 Directory.Exists( result.WorkspacePath ).ShouldBeTrue();
+            }
+            finally
+            {
+                await sut.CleanupWorkspaceAsync( guid );
+            }
+        }
+
+        [ Fact ]
+        public async Task Should_create_script_based_on_entered_commands()
+        {
+            var guid = Guid.Empty;
+            var sut = SystemUnderTest();
+            try
+            {
+                var result = await sut.ProcessAsync( new Pipeline
+                {
+                    Steps = new List<Step>
+                    {
+                        new Step
+                        {
+                            Name = "MyStep",
+                            Image = TestStepHelper.BasicAlpineImage(),
+                            Commands = TestStepHelper.DummyCommand()
+                        }
+                    }
+                } );
+
+                guid = result.Identitifer.GetValueOrDefault();
+                result.WorkspacePath.ShouldNotBeNullOrWhiteSpace();
+
+                File.Exists( $"{result.WorkspacePath}/MyStep_{guid}.sh" ).ShouldBeTrue();
             }
             finally
             {
@@ -66,15 +113,9 @@
                         new Step
                         {
                             Name = nameof( Should_run_steps_in_a_process ),
-                            Image = new Image
-                            {
-                                Parent = "alpine",
-                                Tag = "latest"
-                            },
+                            Image = TestStepHelper.BasicAlpineImage(),
                             Commands = new List<string>
                             {
-                                "/bin/sh",
-                                "-c",
                                 $"echo {command}"
                             }
                         }

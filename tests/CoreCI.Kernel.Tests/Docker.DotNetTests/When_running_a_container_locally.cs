@@ -12,9 +12,12 @@
     using Kernel.Infrastructure.Extensions;
     using Shouldly;
     using Xunit;
+    using Xunit.Abstractions;
 
-    public class When_running_a_container_locally
+    public class When_running_a_container_locally :TestBase
     {
+        public When_running_a_container_locally( ITestOutputHelper outputHelper ) : base( outputHelper ) { }
+
         [ Fact(Skip = "For reference only") ]
         public async Task Should_run_container()
         {

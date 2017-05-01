@@ -5,6 +5,6 @@
         public string WorkspacePath { get; set; }
         public string RemoteUrl { get; set; }
         public string Sha { get; set; }
-        public string Ref { get; set; }
+        public string Branch { get; set; }
     }
 }

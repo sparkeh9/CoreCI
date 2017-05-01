@@ -11,7 +11,9 @@
     using Docker.DotNet.BasicAuth;
     using Docker.DotNet.Models;
     using Docker.DotNet.X509;
+    using Infrastructure.Exceptions;
     using Infrastructure.Extensions;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Models;
 
@@ -24,6 +26,9 @@
         private readonly PipelineProcessorOptions options;
         private readonly DockerClient dockerClient;
         private readonly List<string> startedContainers = new List<string>();
+        private Guid workspaceIdentifier;
+
+        public ILogger Logger { get; set; }
 
         public PipelineProcessor( IOptions<PipelineProcessorOptions> configuration, Stream stdInStream = null, Stream stdOutStream = null, Stream errStream = null )
         {
@@ -42,50 +47,53 @@
         {
             try
             {
+                Logger?.LogInformation( "Processing pipeline" );
                 ctx.ThrowIfCancellationRequested();
-                PipelineProcessorResult result;
 
-                if ( !pipeline.WorkspacePath.IsNullOrWhiteSpace() )
-                {
-                    result = new PipelineProcessorResult
-                    {
-                        WorkspacePath = pipeline.WorkspacePath
-                    };
-                }
-                else
-                {
-                    var workspaceIdentifier = Guid.NewGuid();
-                    result = new PipelineProcessorResult
-                    {
-                        Identitifer = workspaceIdentifier,
-                        WorkspacePath = GetWorkspacePath(workspaceIdentifier)
-                    };
-                }
+                if ( pipeline.Steps == null || !pipeline.Steps.Any() )
+                    throw new NoStepsFoundException();
 
+                workspaceIdentifier = Guid.NewGuid();
+
+                var result = new PipelineProcessorResult
+                {
+                    Identitifer = workspaceIdentifier,
+                    WorkspacePath = !pipeline.WorkspacePath.IsNullOrWhiteSpace() && pipeline.WorkspacePath != "/workspace"
+                        ? pipeline.WorkspacePath
+                        : GetWorkspacePath( workspaceIdentifier )
+                };
+
+
+                Logger?.LogDebug( $"Creating workspace directory {result.WorkspacePath}" );
                 Directory.CreateDirectory( result.WorkspacePath );
 
                 var steps = pipeline.Steps?.ToList();
+
+                await GenerateStepScripts( result.Identitifer, steps, result.WorkspacePath );
                 var containers = await GetStepContainersAsync( steps, result.WorkspacePath.ToTranslatedPath() );
 
                 foreach ( var container in containers )
                 {
+                    await WriteToProcessLog( $"Executing step - {container.Step.Name}" );
                     ctx.ThrowIfCancellationRequested();
                     startedContainers.Add( container.ContainerId );
 
                     await dockerClient.Containers.StartContainerAsync( container.ContainerId, new ContainerStartParameters() );
-                    var stdOutLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId,
-                        new ContainerLogsParameters
-                        {
-                            ShowStdout = true
-                        }, ctx );
-
-                    var errorLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId,
-                        new ContainerLogsParameters
-                        {
-                            ShowStderr = true
-                        }, ctx );
 
                     await dockerClient.Containers.WaitContainerAsync( container.ContainerId, ctx );
+                    var stdOutLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId,
+                                                                                          new ContainerLogsParameters
+                                                                                          {
+                                                                                              ShowStdout = true
+                                                                                          }, ctx );
+
+                    var errorLogs = await dockerClient.Containers.GetContainerLogsAsync( container.ContainerId,
+                                                                                         new ContainerLogsParameters
+                                                                                         {
+                                                                                             ShowStderr = true
+                                                                                         }, ctx );
+
+
                     await stdOutLogs.CopyToAsync( stdOutStream, StreamBufferSize, ctx );
                     await errorLogs.CopyToAsync( errStream, StreamBufferSize, ctx );
                 }
@@ -99,7 +107,7 @@
             }
             finally
             {
-                await stdOutStream.WriteLineAsync( "Cleaning up" );
+                await WriteToProcessLog( "Cleaning up" );
                 foreach ( string containerId in startedContainers )
                 {
                     await dockerClient.Containers.StopContainerAsync( containerId, new ContainerStopParameters(), CancellationToken.None );
@@ -108,41 +116,71 @@
             }
         }
 
+        private async Task GenerateStepScripts( Guid? resultIdentitifer, List<Step> steps, string resultWorkspacePath )
+        {
+            Logger?.LogDebug( $"Generating step scripts" );
+            foreach ( var step in steps )
+            {
+                var commands = step.Commands;
+
+                if ( commands == null || !commands.Any() )
+                    continue;
+
+                using ( TextWriter tw = File.CreateText( $"{resultWorkspacePath}/{step.Name}_{resultIdentitifer}.sh" ) )
+                {
+                    tw.NewLine = "\n";
+                    await tw.WriteLineAsync( "#!/bin/sh" );
+                    await tw.WriteLineAsync( "cd /workspace" );
+
+                    foreach ( var command in commands )
+                    {
+                        await tw.WriteLineAsync( command );
+                    }
+                }
+            }
+        }
+
+
         /// <summary>
         /// Generates a list of container IDs representing each step.
         /// </summary>
         /// <param name="steps"></param>
         /// <param name="workspacePath"></param>
         /// <returns></returns>
-        private async Task<IEnumerable<StepContainer>> GetStepContainersAsync( IReadOnlyCollection<Step> steps,
-            string workspacePath )
+        private async Task<IEnumerable<StepContainer>> GetStepContainersAsync( IReadOnlyCollection<Step> steps, string workspacePath )
         {
+            Logger?.LogDebug( $"Creating step containers" );
             if ( steps == null || !steps.Any() )
                 return Enumerable.Empty<StepContainer>();
 
-            await stdOutStream.WriteLineAsync( "Generating steps" );
             await PullAllRequiredImagesAsync( steps );
 
             var containerResponses = new List<StepContainer>();
 
             foreach ( var step in steps )
             {
-                await stdOutStream.WriteLineAsync( $"- {step.Name} ({step.Image})" );
+                if ( step.Name.IsNullOrWhiteSpace() )
+                    throw new StepNameMissingException( $"With image: {step.Image}" );
+
                 var containerResponse = await dockerClient.Containers
                                                           .CreateContainerAsync( new CreateContainerParameters( new
-                                                              Config
-                                                              {
-                                                                  Image = step.Image
-                                                                              .ToString(),
-                                                                  AttachStdout = true,
-                                                                  AttachStderr = true,
-                                                                  Entrypoint = step.Commands !=  null 
-                                                                        ? step.Commands.ToList()
-                                                                        : null,
-                                                                  Env = step.EnvironmentVariables.Select( x => $"{x.Key}={x.Value}" ).ToList(),
-                                                                  Volumes = step.ExtractVolumes( workspacePath ),
-                                                                  
-                                                              } )
+                                                                                                                    Config
+                                                                                                                    {
+                                                                                                                        Image = step.Image.ToString(),
+                                                                                                                        AttachStdout = true,
+                                                                                                                        AttachStderr = true,
+                                                                                                                        Entrypoint = step.Commands != null
+                                                                                                                            ? new List<string>
+                                                                                                                            {
+                                                                                                                                "sh",
+                                                                                                                                $"/workspace/{step.Name}_{workspaceIdentifier}.sh" //                                                                                                                                "ls","-al","workspace"
+//                                                                                                                                $"chmod +x /workspace/{step.Name}_{workspaceIdentifier}.sh",
+//                                                                                                                                scriptPath
+                                                                                                                            }
+                                                                                                                            : null,
+                                                                                                                        Env = step.EnvironmentVariables?.Select( x => $"{x.Key}={x.Value}" ).ToList(),
+                                                                                                                        Volumes = step.ExtractVolumes( workspacePath ),
+                                                                                                                    } )
                                                           {
                                                               HostConfig = new HostConfig
                                                               {
@@ -161,20 +199,39 @@
 
         private async Task PullAllRequiredImagesAsync( IEnumerable<Step> steps )
         {
-            await Task.WhenAll( steps.Select( step => dockerClient.Images.PullImageAsync( new ImagesPullParameters
+            Logger?.LogDebug( $"Pulling required images" );
+
+            foreach ( var step in steps )
             {
-                All = false,
-                Parent =
-                    step.Image.Parent,
-                Tag = step.Image.Tag
-            }, null ) ) );
+                var foundImage = await dockerClient.Images.ListImagesAsync( new ImagesListParameters
+                {
+                    All = false,
+                    MatchName = step.Image.ToString()
+                } );
+
+                if ( foundImage.Any() )
+                    continue;
+
+                await WriteToProcessLog( $"Image {step.Image} not found locally. Pulling" );
+
+                var pullImageStream = await dockerClient.Images.CreateImageAsync( new ImagesCreateParameters
+                {
+                    Parent = step.Image.Parent,
+                    Tag = step.Image.Tag,
+                }, null );
+
+                await pullImageStream.CopyToAsync( stdOutStream );
+            }
         }
 
         public async Task CleanupWorkspaceAsync( Guid id )
         {
+            Logger?.LogDebug( $"Cleaning up workspace" );
             await Task.Delay( 0 );
             string path = GetWorkspacePath( id );
-            Directory.Delete( path, true );
+
+            if ( Directory.Exists( path ) )
+                Directory.Delete( path, true );
         }
 
         private string GetWorkspacePath( Guid id )
@@ -184,6 +241,7 @@
 
         private Credentials GetDockerRemoteApiCredentials()
         {
+            Logger?.LogDebug( $"Determining docker remote API credentials" );
             var uri = new Uri( options.RemoteEndpoint );
 
             if ( uri.Scheme == "npipe" )
@@ -208,11 +266,17 @@
             }
 
             if ( options.BasicAuth != null &&
-                !options.BasicAuth.Username.IsNullOrWhiteSpace() &&
-                !options.BasicAuth.Password.IsNullOrWhiteSpace() )
+                 !options.BasicAuth.Username.IsNullOrWhiteSpace() &&
+                 !options.BasicAuth.Password.IsNullOrWhiteSpace() )
                 return new BasicAuthCredentials( options.BasicAuth.Username, options.BasicAuth.Password, options.BasicAuth.Tls );
 
             return new AnonymousCredentials();
+        }
+
+        private async Task WriteToProcessLog( string message )
+        {
+            Logger?.LogDebug( message );
+            await stdOutStream.WriteLineAsync( message );
         }
 
         private class StepContainer

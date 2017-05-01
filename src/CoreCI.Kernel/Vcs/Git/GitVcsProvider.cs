@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Infrastructure.Extensions;
     using Models;
     using PipelineProcessor;
 
@@ -15,9 +16,9 @@
             this.pipelineProcessor = pipelineProcessor;
         }
 
-        public async Task<bool> AcquireAsync( GitVcsConfiguration configuration, CancellationToken ctx = default( CancellationToken ) )
+        public async Task<PipelineProcessorResult> AcquireAsync( GitVcsConfiguration configuration, CancellationToken ctx = default(CancellationToken) )
         {
-            var result = await pipelineProcessor.ProcessAsync( new Pipeline
+            return await pipelineProcessor.ProcessAsync( new Pipeline
             {
                 WorkspacePath = configuration.WorkspacePath,
                 Steps = new List<Step>
@@ -27,22 +28,38 @@
                         Name = "CloneGitRepository",
                         Image = new Image
                         {
-                            Parent = "plugins/git",
+                            Parent = "bravissimolabs/alpine-git",
                             Tag = "latest"
                         },
-                        EnvironmentVariables = new Dictionary<string, string>
-                        {
-                            { "DRONE_WORKSPACE", "/workspace" },
-                            { "DRONE_BUILD_EVENT", "push" },
-                            { "DRONE_REMOTE_URL", configuration.RemoteUrl },
-                            { "DRONE_COMMIT_SHA", configuration.Sha },
-                            { "DRONE_COMMIT_REF", configuration.Ref },
-                        }
+                        Commands = GenerateCommands( configuration )
                     }
                 }
             }, ctx );
+        }
 
-            return true;
+        internal IEnumerable<string> GenerateCommands( GitVcsConfiguration configuration )
+        {
+            yield return "git init";
+
+            if ( !configuration.Sha.IsNullOrWhiteSpace() )
+            {
+                yield return $"git remote add origin {configuration.RemoteUrl}";
+                yield return "git pull";
+                yield return $"git checkout -qf {configuration.Sha}";
+                yield break;
+            }
+
+            if ( configuration.Branch.IsNullOrWhiteSpace() )
+            {
+                yield return $"git remote add origin {configuration.RemoteUrl}";
+                yield return "git fetch origin master --depth=1";
+                yield return "git checkout -qf master";
+            }
+            else
+            {
+                yield return $"git remote add -t {configuration.Branch} -f origin {configuration.RemoteUrl}";
+                yield return $"git checkout -qf origin/{configuration.Branch}";
+            }
         }
     }
 }

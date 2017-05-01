@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "CoreCI.Kernel.Tests": {
+      "commandName": "Project"
+    }
+  }
+}

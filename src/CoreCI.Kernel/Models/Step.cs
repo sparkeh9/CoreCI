@@ -1,8 +1,6 @@
 ﻿namespace CoreCI.Kernel.Models
 {
     using System.Collections.Generic;
-    using Infrastructure.Extensions;
-    using CoreCI.Kernel.Infrastructure.Exceptions;
 
     public class Step
     {
@@ -17,12 +15,11 @@
     {
         public static Dictionary<string, object> ExtractVolumes( this Step operand, string workspacePath )
         {
-            return null;
-//            var dictionary = new Dictionary<string, object>
-//            {
-//                { workspacePath, new { } }
-//            };
-//
+            var dictionary = new Dictionary<string, object>
+            {
+                { "/workspace", new { } }
+            };
+////
 //            if ( operand?.Volumes != null )
 //            {
 //                foreach ( var volume in operand?.Volumes )
@@ -33,8 +30,8 @@
 //                    dictionary.Add( volume.LocalPath, new { } );
 //                }
 //            }
-//
-//            return dictionary;
+
+            return dictionary;
         }
 
         public static IEnumerable<string> ExtractBindings( this Step operand, string workspacePath )
