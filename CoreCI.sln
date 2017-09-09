@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1A853FB2-4679-48BE-9064-30D0EA0BF1D8}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{86930EA4-3486-4B29-9651-5DD9F0457033}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\SetEnv.Windows.DockerToolBox.ps1 = scripts\SetEnv.Windows.DockerToolBox.ps1
+		scripts\SetEnv.Windows.NamedPipe.ps1 = scripts\SetEnv.Windows.NamedPipe.ps1
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCI.Web", "src\CoreCI.Web\CoreCI.Web.csproj", "{CBD169FB-EC34-4009-9085-6604F19DA810}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBD169FB-EC34-4009-9085-6604F19DA810}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBD169FB-EC34-4009-9085-6604F19DA810}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBD169FB-EC34-4009-9085-6604F19DA810}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBD169FB-EC34-4009-9085-6604F19DA810}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{86930EA4-3486-4B29-9651-5DD9F0457033} = {1A853FB2-4679-48BE-9064-30D0EA0BF1D8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {033DB4FC-C2C4-467E-BA21-C98DF02CE79D}
+	EndGlobalSection
+EndGlobal
