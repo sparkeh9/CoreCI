@@ -38,6 +38,7 @@
 
                                         // add a custom operation filter which sets default values
                                         options.OperationFilter<SwaggerDefaultValues>();
+                                        options.DocumentFilter<LowercaseDocumentFilter>();
 
                                         // integrate xml comments
                                         options.IncludeXmlComments( XmlCommentsFilePath );
@@ -45,7 +46,7 @@
                                     } );
             services.AddMvcCore()
                     .AddVersionedApiExplorer( o => o.GroupNameFormat = "'v'VVV" );
-
+            services.AddRouting( x => { x.LowercaseUrls = true; } );
             services.AddMvc()
                     .AddJsonOptions( options =>
                                      {

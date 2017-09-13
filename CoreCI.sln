@@ -5,6 +5,7 @@ VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1A853FB2-4679-48BE-9064-30D0EA0BF1D8}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		README.md = README.md
 	EndProjectSection
@@ -15,7 +16,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{8693
 		scripts\SetEnv.Windows.NamedPipe.ps1 = scripts\SetEnv.Windows.NamedPipe.ps1
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCI.Web", "src\CoreCI.Web\CoreCI.Web.csproj", "{CBD169FB-EC34-4009-9085-6604F19DA810}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCI.Web", "src\CoreCI.Web\CoreCI.Web.csproj", "{CBD169FB-EC34-4009-9085-6604F19DA810}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCI.Sdk", "src\CoreCI.Sdk\CoreCI.Sdk.csproj", "{A014984E-2CE1-4F50-BAB2-47C7EB702432}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCI.Common", "src\CoreCI.Common\CoreCI.Common.csproj", "{7E30CA71-1B5B-43F4-B2F5-5A9604CA4CF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCI.BuildAgent.Windows", "src\CoreCI.BuildAgent.Windows\CoreCI.BuildAgent.Windows.csproj", "{EF0BFBE3-1D10-44D2-85F3-F0A7D9C95E4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCI.BuildAgent.Common", "src\CoreCI.BuildAgent.Common\CoreCI.BuildAgent.Common.csproj", "{6BD154D6-F1EA-4059-B27A-B2A90911B781}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +36,22 @@ Global
 		{CBD169FB-EC34-4009-9085-6604F19DA810}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBD169FB-EC34-4009-9085-6604F19DA810}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBD169FB-EC34-4009-9085-6604F19DA810}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A014984E-2CE1-4F50-BAB2-47C7EB702432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A014984E-2CE1-4F50-BAB2-47C7EB702432}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A014984E-2CE1-4F50-BAB2-47C7EB702432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A014984E-2CE1-4F50-BAB2-47C7EB702432}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E30CA71-1B5B-43F4-B2F5-5A9604CA4CF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E30CA71-1B5B-43F4-B2F5-5A9604CA4CF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E30CA71-1B5B-43F4-B2F5-5A9604CA4CF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E30CA71-1B5B-43F4-B2F5-5A9604CA4CF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF0BFBE3-1D10-44D2-85F3-F0A7D9C95E4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF0BFBE3-1D10-44D2-85F3-F0A7D9C95E4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF0BFBE3-1D10-44D2-85F3-F0A7D9C95E4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF0BFBE3-1D10-44D2-85F3-F0A7D9C95E4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BD154D6-F1EA-4059-B27A-B2A90911B781}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD154D6-F1EA-4059-B27A-B2A90911B781}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BD154D6-F1EA-4059-B27A-B2A90911B781}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BD154D6-F1EA-4059-B27A-B2A90911B781}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

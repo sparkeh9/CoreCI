@@ -1,10 +1,9 @@
-﻿namespace CoreCI.Web.Api.v1.Models
+﻿namespace CoreCI.Common.Models.Jobs
 {
-    using System;
-    using System.Collections.Generic;
-    using Api.Models;
+   using System;
+   using System.Collections.Generic;
 
-    public class JobsDto
+   public class JobsDto
     {
         public BuildEnvironment Environment { get; set; }
         public Guid JobId { get; set; }

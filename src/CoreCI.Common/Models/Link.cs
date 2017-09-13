@@ -1,4 +1,4 @@
-﻿namespace CoreCI.Web.Api.Models
+﻿namespace CoreCI.Common.Models
 {
     public class Link
     {

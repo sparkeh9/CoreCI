@@ -1,4 +1,4 @@
-﻿namespace CoreCI.Web.Api.v1.Models
+﻿namespace CoreCI.Common.Models
 {
     public enum BuildEnvironment
     {
