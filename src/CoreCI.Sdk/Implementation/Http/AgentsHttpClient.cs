@@ -18,7 +18,7 @@
             this.coreCiHttpClient = coreCiHttpClient;
         }
 
-        public async Task RegisterAsync( BuildEnvironment environment = BuildEnvironment.Any )
+        public async Task RegisterAsync( BuildEnvironment environment )
         {
             var response = await coreCiHttpClient.BaseApiUrl
                                                  .AppendPathSegment( "agents" )

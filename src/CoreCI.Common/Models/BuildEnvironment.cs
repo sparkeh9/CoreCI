@@ -2,7 +2,6 @@
 {
     public enum BuildEnvironment
     {
-        Any,
         Linux,
         Mac,
         Windows

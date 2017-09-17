@@ -5,7 +5,7 @@
     using Common;
     using Common.Implementation;
     using Common.Models;
-    using CoreCI.Sdk;
+    using Sdk;
     using Sdk.Implementation.Http;
     using Sdk.Implementation.Http.Authentication;
 

@@ -100,6 +100,10 @@
       <Project>{6BD154D6-F1EA-4059-B27A-B2A90911B781}</Project>
       <Name>CoreCI.BuildAgent.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CoreCI.Common\CoreCI.Common.csproj">
+      <Project>{7E30CA71-1B5B-43F4-B2F5-5A9604CA4CF2}</Project>
+      <Name>CoreCI.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CoreCI.Sdk\CoreCI.Sdk.csproj">
       <Project>{A014984E-2CE1-4F50-BAB2-47C7EB702432}</Project>
       <Name>CoreCI.Sdk</Name>

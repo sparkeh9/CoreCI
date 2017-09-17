@@ -4,6 +4,7 @@
     using System.Timers;
     using Common;
     using Topshelf;
+    using CoreCI.Common.Models;
 
     public class WindowsBuildAgentService : ServiceControl
     {
@@ -23,7 +24,7 @@
             timer.Elapsed += async ( sender, args ) =>
                              {
                                  timer.Interval = TimeSpan.FromSeconds( 30 ).TotalMilliseconds;
-                                 await buildAgentDaemon.InvokeAsync();
+                                 await buildAgentDaemon.InvokeAsync( BuildEnvironment.Windows );
                              };
             timer.Start();
             return true;

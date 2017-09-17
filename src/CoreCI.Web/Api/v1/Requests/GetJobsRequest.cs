@@ -6,6 +6,6 @@
     public class GetJobsRequest
     {
         public int Page { get; set; } = 1;
-        public BuildEnvironment Environment { get; set; } = BuildEnvironment.Any;
+        public BuildEnvironment Environment { get; set; }
     }
 }

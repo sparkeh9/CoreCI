@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using CoreCI.Common.Models;
     using Polly;
     using Polly.Retry;
     using Sdk;
@@ -22,24 +23,35 @@
                                       .WaitAndRetryForeverAsync( Sleep, onRetry : OnRetry );
         }
 
-        public async Task InvokeAsync()
+        public async Task InvokeAsync( BuildEnvironment environment )
         {
-            PollStatusChanged?.Invoke( this, false );
+            DisablePolling();
 
             if ( !isRegistered )
                 await waitForeverPolicy.ExecuteAsync( async () =>
                                                       {
                                                           Console.WriteLine( "Attempting to register build agent with coordinator" );
-                                                          await coreCiClient.Agents.RegisterAsync();
+                                                          await coreCiClient.Agents.RegisterAsync( environment );
                                                           isRegistered = true;
                                                       } );
 
-            PollStatusChanged?.Invoke( this, true );
+            Console.WriteLine( "Checking for available jobs" );
+            var job = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environment );
+
+            if ( job == null )
+            {
+                EnablePolling();
+                return;
+            }
+
+            Console.WriteLine( $"Reserved job {job.JobId}" );
+
+            EnablePolling();
         }
 
         public async Task StopAsync()
         {
-            PollStatusChanged?.Invoke( this, false );
+            DisablePolling();
 
             if ( !isRegistered )
                 return;
@@ -56,13 +68,23 @@
 
         private void OnRetry( Exception exception, TimeSpan calculatedWaitDuration )
         {
-            PollStatusChanged?.Invoke( this, false );
+            DisablePolling();
             Console.WriteLine( $"{exception.Message} - retrying in {calculatedWaitDuration}" );
         }
 
         private TimeSpan Sleep( int attempt )
         {
             return TimeSpan.FromSeconds( 30 );
+        }
+
+        private void DisablePolling()
+        {
+            PollStatusChanged?.Invoke( this, false );
+        }
+
+        private void EnablePolling()
+        {
+            PollStatusChanged?.Invoke( this, true );
         }
     }
 }

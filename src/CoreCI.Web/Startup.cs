@@ -27,7 +27,8 @@
                                     {
                                         // resolve the IApiVersionDescriptionProvider service
                                         // note: that we have to build a temporary service provider here because one has not been created yet
-                                        var provider = services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+                                        var provider = services.BuildServiceProvider()
+                                                               .GetRequiredService<IApiVersionDescriptionProvider>();
 
                                         // add a swagger document for each discovered API version
                                         // note: you might choose to skip or document deprecated API versions differently

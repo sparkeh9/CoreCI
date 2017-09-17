@@ -5,7 +5,7 @@
 
     public interface IAgents
     {
-        Task RegisterAsync( BuildEnvironment environment = BuildEnvironment.Any );
+        Task RegisterAsync( BuildEnvironment environment );
         Task DeregisterAsync();
     }
 }
