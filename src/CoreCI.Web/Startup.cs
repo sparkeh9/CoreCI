@@ -1,15 +1,20 @@
 ﻿namespace CoreCI.Web
 {
+    using System;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using System.IO;
     using System.Reflection;
+    using Infrastructure.Bootstrapping;
+    using Infrastructure.Options;
+    using Infrastructure.Routing;
     using Infrastructure.Swagger;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.ApiExplorer;
     using Microsoft.Extensions.PlatformAbstractions;
+    using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Swashbuckle.AspNetCore.Swagger;
 
@@ -21,9 +26,10 @@
         public Startup( IConfiguration configuration ) => Configuration = configuration;
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices( IServiceCollection services )
+        public IServiceProvider ConfigureServices( IServiceCollection services )
         {
-            services.AddSwaggerGen( options =>
+            services.Configure<MongoDbOptions>( Configuration.GetSection( "MongoDb" ) );
+            services.AddSwaggerGen( o =>
                                     {
                                         // resolve the IApiVersionDescriptionProvider service
                                         // note: that we have to build a temporary service provider here because one has not been created yet
@@ -34,24 +40,31 @@
                                         // note: you might choose to skip or document deprecated API versions differently
                                         foreach ( var description in provider.ApiVersionDescriptions )
                                         {
-                                            options.SwaggerDoc( description.GroupName, CreateInfoForApiVersion( description ) );
+                                            o.SwaggerDoc( description.GroupName, CreateInfoForApiVersion( description ) );
                                         }
 
                                         // add a custom operation filter which sets default values
-                                        options.OperationFilter<SwaggerDefaultValues>();
-                                        options.DocumentFilter<LowercaseDocumentFilter>();
+                                        o.OperationFilter<SwaggerDefaultValues>();
+                                        o.DocumentFilter<LowercaseDocumentFilter>();
 
                                         // integrate xml comments
-                                        options.IncludeXmlComments( XmlCommentsFilePath );
-                                        options.DescribeAllEnumsAsStrings();
+                                        o.IncludeXmlComments( XmlCommentsFilePath );
+                                        o.DescribeAllEnumsAsStrings();
                                     } );
             services.AddMvcCore()
                     .AddVersionedApiExplorer( o => o.GroupNameFormat = "'v'VVV" );
-            services.AddRouting( x => { x.LowercaseUrls = true; } );
+            services.AddRouting( o =>
+                                 {
+                                     o.AppendTrailingSlash = false;
+                                     o.LowercaseUrls = true;
+                                     o.ConstraintMap.Add( "ObjectId", typeof( ObjectIdRouteConstraint ) );
+                                 } );
             services.AddMvc()
-                    .AddJsonOptions( options =>
+                    .AddJsonOptions( o =>
                                      {
-                                         options.SerializerSettings.Converters.Add( new StringEnumConverter
+                                         o.SerializerSettings.Formatting = Formatting.Indented;
+                                         o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                                         o.SerializerSettings.Converters.Add( new StringEnumConverter
                                          {
                                              CamelCaseText = true,
                                              AllowIntegerValues = true
@@ -63,6 +76,8 @@
                                            o.ReportApiVersions = true;
                                            o.AssumeDefaultVersionWhenUnspecified = true;
                                        } );
+
+            return AutofacContainerBootstrapper.ConfigureServices( services );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

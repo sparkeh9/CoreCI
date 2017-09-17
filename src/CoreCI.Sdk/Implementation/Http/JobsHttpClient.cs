@@ -8,6 +8,7 @@
     using Common.Models.Jobs;
     using Flurl;
     using Flurl.Http;
+    using MongoDB.Bson;
 
     public class JobsHttpClient : IJobs
     {
@@ -28,7 +29,7 @@
             return response;
         }
 
-        public async Task<JobDto> ReserveFirstAvailableJobAsync( BuildEnvironment environment )
+        public async Task<(JobDto job, JobReservedDto reservation)?> ReserveFirstAvailableJobAsync( BuildEnvironment environment )
         {
             var endpointUrl = coreCiHttpClient.BaseApiUrl
                                               .AppendPathSegment( "jobs" )
@@ -41,28 +42,27 @@
             if ( firstJob == null )
                 return null;
 
-            await ReserveJobAsync( firstJob.JobId );
+            var reservation = await ReserveJobAsync( firstJob.JobId );
 
-            return firstJob;
+            return (firstJob, reservation);
         }
 
-        public async Task<JobDto> GetJobDetailsAsync( BuildEnvironment environment )
+        public async Task<JobDto> GetJobDetailsAsync( ObjectId jobId )
         {
             var job = await coreCiHttpClient.BaseApiUrl
                                             .AppendPathSegment( "jobs" )
-                                            .AppendPathSegment( "details" )
-                                            .SetQueryParam( "environment", environment )
+                                            .AppendPathSegment( jobId )
                                             .Authenticate( coreCiHttpClient.Authenticator )
                                             .GetJsonAsync<JobDto>();
 
             return job;
         }
 
-        public async Task<JobReservedDto> ReserveJobAsync( Guid guid )
+        public async Task<JobReservedDto> ReserveJobAsync( ObjectId jobId )
         {
             var jobReservedDto = await coreCiHttpClient.BaseApiUrl
                                                        .AppendPathSegment( "jobs" )
-                                                       .AppendPathSegment( guid )
+                                                       .AppendPathSegment( jobId )
                                                        .AppendPathSegment( "reserve" )
                                                        .Authenticate( coreCiHttpClient.Authenticator )
                                                        .PostJsonAsync( new { } )

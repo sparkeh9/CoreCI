@@ -23,7 +23,7 @@
                     AcquireGenericGit( job, gitVcsJob, path );
                     return;
                 case VcsType.BitBucketGit:
-                    if ( !( job.Data is BitBucketVcsJob bitbucketGitVcsJob ) )
+                    if ( !( job.Data is BitBucketGitVcsJob bitbucketGitVcsJob ) )
                         throw new ArgumentOutOfRangeException( nameof( job.Data ) );
 
                     AcquireBitBucketGit( job, bitbucketGitVcsJob, path );
@@ -40,12 +40,12 @@
             genericGitProvider.Clone( jobData.Url, $"{path}{Path.DirectorySeparatorChar}{jobDto.JobId}" );
         }
 
-
-        private void AcquireBitBucketGit( JobDto jobDto, BitBucketVcsJob jobData, string path )
+        private void AcquireBitBucketGit( JobDto jobDto, BitBucketGitVcsJob jobData, string path )
         {
             var bitbucketGitProvider = jobData.OAuth2Credentials != null
                 ? new BitBucketGitVcsProvider( jobData.OAuth2Credentials )
                 : new BitBucketGitVcsProvider( jobData.BasicAuthenticationCredentials );
+            bitbucketGitProvider.OnProgress += ( sender, report ) => OnProgress?.Invoke( this, report.ToString() );
             bitbucketGitProvider.Clone( jobData.Url, $"{path}{Path.DirectorySeparatorChar}{jobDto.JobId}" );
         }
     }

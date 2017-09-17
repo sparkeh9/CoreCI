@@ -1,10 +1,11 @@
 ﻿namespace CoreCI.Common.Models.Jobs
 {
    using System;
+   using MongoDB.Bson;
 
-   public class JobReservedDto
+    public class JobReservedDto
     {
-        public Guid JobId { get; set; }
+        public ObjectId JobId { get; set; }
         public Guid BuildAgentToken { get; set; }
     }
 }

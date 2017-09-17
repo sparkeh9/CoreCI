@@ -1,10 +1,11 @@
-﻿namespace CoreCI.Common.Models.Jobs
+﻿namespace CoreCI.Common.Data.MongoDb.Project
 {
+    using Models;
+    using Models.Vcs;
     using MongoDB.Bson.Serialization.Attributes;
-    using Vcs;
 
-    [ BsonDiscriminator( nameof( GitVcsJob ) ) ]
-    public class GitVcsJob : VcsJob
+    [ BsonDiscriminator( nameof( VcsType.Git ) ) ]
+    public class GitProject : ProjectBase
     {
         public override VcsType VcsType => VcsType.Git;
         public string Url { get; set; }

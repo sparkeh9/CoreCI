@@ -1,7 +1,7 @@
-﻿namespace CoreCI.BuildAgent.Windows.Autofac
+﻿namespace CoreCI.BuildAgent.Windows.Infrastructure.Modules
 {
     using System.Configuration;
-    using global::Autofac;
+    using Autofac;
     using Common;
     using Common.Implementation;
     using Common.Models;

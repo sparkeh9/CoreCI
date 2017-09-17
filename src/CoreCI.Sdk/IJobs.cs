@@ -4,10 +4,13 @@
     using System.Threading.Tasks;
     using Common.Models;
     using Common.Models.Jobs;
+    using MongoDB.Bson;
 
-   public interface IJobs
+    public interface IJobs
     {
-        Task<IEnumerable<JobDto>> ListAvailableJobsAsync( BuildEnvironment environment);
-        Task<JobDto> ReserveFirstAvailableJobAsync( BuildEnvironment environment);
+        Task<IEnumerable<JobDto>> ListAvailableJobsAsync( BuildEnvironment environment );
+        Task<(JobDto job, JobReservedDto reservation)?> ReserveFirstAvailableJobAsync( BuildEnvironment environment );
+        Task<JobDto> GetJobDetailsAsync( ObjectId jobIdt );
+        Task<JobReservedDto> ReserveJobAsync( ObjectId jobId );
     }
 }

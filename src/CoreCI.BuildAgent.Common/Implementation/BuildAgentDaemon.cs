@@ -42,15 +42,15 @@
             Console.WriteLine( "Checking for available jobs" );
             var job = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environment );
 
-            if ( job == null )
+            if ( !job.HasValue )
             {
                 EnablePolling();
                 return;
             }
 
-            Console.WriteLine( $"Reserved job {job.JobId}" );
-            await vcsAppropriator.AcquireAsync( job, @"D:\temp\coreci" );
-            Console.WriteLine( $"Acquired content for job {job.JobId}" );
+            Console.WriteLine( $"Reserved job {job.Value.job.JobId}" );
+            await vcsAppropriator.AcquireAsync( job.Value.job, @"D:\temp\coreci" );
+            Console.WriteLine( $"Acquired content for job {job.Value.job.JobId}" );
             EnablePolling();
         }
 

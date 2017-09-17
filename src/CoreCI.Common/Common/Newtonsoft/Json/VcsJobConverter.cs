@@ -1,10 +1,10 @@
-﻿namespace CoreCI.Common.Converter
+﻿namespace CoreCI.Common.Common.Newtonsoft.Json
 {
     using System;
+    using global::Newtonsoft.Json;
+    using global::Newtonsoft.Json.Linq;
     using Models;
     using Models.Jobs;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     public class VcsJobConverter : JsonConverter
     {
@@ -13,7 +13,7 @@
 
         public override bool CanConvert( Type objectType )
         {
-            return objectType == typeof( IVcsJob );
+            return objectType == typeof( VcsJob );
         }
 
         public override void WriteJson( JsonWriter writer, object value, JsonSerializer serializer )
@@ -30,7 +30,7 @@
                 throw new ArgumentOutOfRangeException( nameof( VcsType ) );
             }
 
-            IVcsJob vcsType;
+            VcsJob vcsType;
 
             switch ( value )
             {
@@ -38,7 +38,7 @@
                     vcsType = new GitVcsJob();
                     break;
                 case VcsType.BitBucketGit:
-                    vcsType = new BitBucketVcsJob();
+                    vcsType = new BitBucketGitVcsJob();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException( nameof( VcsType ) );

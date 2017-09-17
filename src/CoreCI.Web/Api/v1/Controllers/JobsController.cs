@@ -2,10 +2,17 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Common.Data.MongoDb;
+    using Common.Data.MongoDb.Project;
+    using Common.Data.Repository;
+    using Common.Data.Repository.Model;
     using Common.Models;
     using Common.Models.Jobs;
     using Common.Models.Vcs;
     using Microsoft.AspNetCore.Mvc;
+    using MongoDB.Bson;
     using Requests;
 
     /// <summary>
@@ -16,36 +23,40 @@
     [ Route( "api/v{version:apiVersion}/[controller]" ) ]
     public class JobsController : Controller
     {
+        private readonly IJobRepository jobRepository;
+
+        public JobsController( IJobRepository jobRepository )
+        {
+            this.jobRepository = jobRepository;
+        }
+
         /// <summary>
-        ///     Lists jobs up for grabs
+        ///     Lists jobs up for grabsstring
         /// </summary>
         /// <returns></returns>
         [ HttpGet ]
-        public IActionResult Index( GetJobsRequest request )
+        public async Task<IActionResult> Index( GetJobsRequest request )
         {
-            var newGuid = Guid.NewGuid();
+            var results = await jobRepository.ListByAsync( new JobQuery
+            {
+                BuildEnvironment = request.Environment,
+                Page = request.Page
+            } );
+
             return Json( new PagedResponse<JobDto>
             {
                 Page = request.Page,
-                PageLength = 1,
-                Size = 1,
-                Values = new List<JobDto>
+                Next = Url.Action( "Index", "Jobs", new { page = request.Page + 1 }, Request.Scheme ),
+                Previous = request.Page <= 1 ? null : Url.Action( "Index", "Jobs", new { page = request.Page - 1 }, Request.Scheme ),
+                Values = results.Select( x => new JobDto
                 {
-                    new JobDto
+                    Environment = x.Environment,
+                    JobId = x.Id,
+                    Links = new Dictionary<string, Link>
                     {
-                        Environment = BuildEnvironment.Windows,
-                        JobId = newGuid,
-                        Links = new Dictionary<string, Link>
-                        {
-                            { "details", new Link( Url.Action( "Details", "Jobs", new { jobId = newGuid }, Request.Scheme ) ) }
-                        },
-                        Data = new BitBucketVcsJob
-                        {
-                            Url = "https://bitbucket.org/razor-ltd/wellbeing.git"
-                        }
+                        { "details", new Link( Url.Action( "Details", "Jobs", new { jobId = x.Id }, Request.Scheme ) ) }
                     }
-                },
-                Next = Url.Action( "Index", "Jobs", new { page = request.Page + 1 }, Request.Scheme )
+                } ).ToList()
             } );
         }
 
@@ -54,21 +65,21 @@
         /// </summary>
         /// <returns></returns>
         [ HttpGet ]
-        [ Route( "{jobId:Guid}" ) ]
-        public IActionResult Details( Guid jobId )
+        [ Route( "{jobId:ObjectId}" ) ]
+        public async Task<IActionResult> Details( string jobId )
         {
+            var objectId = ObjectId.Parse( jobId );
+
+            var job = await jobRepository.FindByIdAsync( objectId );
+
+            if ( job == null )
+                return NotFound();
+
             return Json( new JobDto
             {
-                Environment = BuildEnvironment.Windows,
-                JobId = jobId,
-                Links = new Dictionary<string, Link>
-                {
-                    { "details", new Link( Url.Action( "Details", "Jobs", new { jobId }, Request.Scheme ) ) }
-                },
-                Data = new GitVcsJob
-                {
-                    Url = "https://github.com/sparkeh9/CoreCI"
-                }
+                Environment = job.Environment,
+                JobId = job.Id,
+                Data = job.Data
             } );
         }
 
@@ -77,12 +88,13 @@
         /// </summary>
         /// <returns></returns>
         [ HttpPost ]
-        [ Route( "{jobId:Guid}/reserve" ) ]
-        public IActionResult Reserve( Guid jobId )
+        [ Route( "{jobId:ObjectId}/reserve" ) ]
+        public IActionResult Reserve( string jobId )
         {
+            var objectId = ObjectId.Parse( jobId );
             return Json( new JobReservedDto
             {
-                JobId = jobId,
+                JobId = objectId,
                 BuildAgentToken = Guid.NewGuid()
             } );
         }

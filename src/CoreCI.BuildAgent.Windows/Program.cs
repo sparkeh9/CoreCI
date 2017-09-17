@@ -3,7 +3,7 @@
     using System;
     using System.Configuration;
     using Autofac;
-    using global::Autofac;
+    using Infrastructure.Modules;
     using Topshelf;
     using Topshelf.Autofac;
 
@@ -15,7 +15,8 @@
         {
             var builder = new ContainerBuilder();
             builder.RegisterModule<BuildAgentDaemonModule>();
-            builder.RegisterInstance( config ).As<Configuration>();
+            builder.RegisterInstance( config )
+                   .As<Configuration>();
             Container = builder.Build();
         }
 
@@ -65,10 +66,7 @@
                                  configure.SetDisplayName( "CoreCIBuildAgent" );
                                  configure.SetDescription( "CoreCI Windows Build Agent" );
 
-                                 configure.OnException( ex =>
-                                                        {
-                                                            Console.WriteLine( ex.Message );
-                                                        } );
+                                 configure.OnException( ex => { Console.WriteLine( ex.Message ); } );
                              } );
         }
     }

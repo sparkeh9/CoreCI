@@ -1,17 +1,19 @@
 ﻿namespace CoreCI.Common.Models.Jobs
 {
-    using System;
     using System.Collections.Generic;
-    using Converter;
+    using Common.Newtonsoft.Json;
+    using MongoDB.Bson;
     using Newtonsoft.Json;
 
     public class JobDto
     {
+        [ JsonConverter( typeof( MongoObjectIdConverter ) ) ]
+        public ObjectId JobId { get; set; }
+
         public BuildEnvironment Environment { get; set; }
-        public Guid JobId { get; set; }
         public Dictionary<string, Link> Links { get; set; }
 
         [ JsonConverter( typeof( VcsJobConverter ) ) ]
-        public IVcsJob Data { get; set; }
+        public VcsJob Data { get; set; }
     }
 }
