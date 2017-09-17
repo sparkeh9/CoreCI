@@ -33,6 +33,7 @@
                                   return new CoreCIHttpClient( credentials.Url ).WithAuthenticator( new OAuthBearerAuthenticator( credentials.Token ) );
                               } ).As<ICoreCI>();
 
+            builder.RegisterType<VcsAppropriator>().As<IVcsAppropriator>();
             builder.RegisterType<BuildAgentDaemon>().As<IBuildAgentDaemon>();
             builder.RegisterType<WindowsBuildAgentService>();
         }

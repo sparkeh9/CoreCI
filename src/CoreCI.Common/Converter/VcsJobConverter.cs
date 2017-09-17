@@ -38,7 +38,7 @@
                     vcsType = new GitVcsJob();
                     break;
                 case VcsType.BitBucketGit:
-                    vcsType = new GitVcsJob();
+                    vcsType = new BitBucketVcsJob();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException( nameof( VcsType ) );

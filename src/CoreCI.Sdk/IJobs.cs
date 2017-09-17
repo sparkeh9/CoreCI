@@ -7,7 +7,7 @@
 
    public interface IJobs
     {
-        Task<IEnumerable<JobsDto>> ListAvailableJobsAsync( BuildEnvironment environment);
-        Task<JobsDto> ReserveFirstAvailableJobAsync( BuildEnvironment environment);
+        Task<IEnumerable<JobDto>> ListAvailableJobsAsync( BuildEnvironment environment);
+        Task<JobDto> ReserveFirstAvailableJobAsync( BuildEnvironment environment);
     }
 }

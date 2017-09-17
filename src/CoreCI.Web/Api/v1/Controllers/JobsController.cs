@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using Common.Models;
     using Common.Models.Jobs;
+    using Common.Models.Vcs;
     using Microsoft.AspNetCore.Mvc;
     using Requests;
 
@@ -23,14 +24,14 @@
         public IActionResult Index( GetJobsRequest request )
         {
             var newGuid = Guid.NewGuid();
-            return Json( new PagedResponse<JobsDto>
+            return Json( new PagedResponse<JobDto>
             {
                 Page = request.Page,
                 PageLength = 1,
                 Size = 1,
-                Values = new List<JobsDto>
+                Values = new List<JobDto>
                 {
-                    new JobsDto
+                    new JobDto
                     {
                         Environment = BuildEnvironment.Windows,
                         JobId = newGuid,
@@ -38,9 +39,9 @@
                         {
                             { "details", new Link( Url.Action( "Details", "Jobs", new { jobId = newGuid }, Request.Scheme ) ) }
                         },
-                        Data = new GitVcsJob
+                        Data = new BitBucketVcsJob
                         {
-                            Url = "https://github.com/sparkeh9/CoreCI"
+                            Url = "https://bitbucket.org/razor-ltd/wellbeing.git"
                         }
                     }
                 },
@@ -56,7 +57,7 @@
         [ Route( "{jobId:Guid}" ) ]
         public IActionResult Details( Guid jobId )
         {
-            return Json( new JobsDto
+            return Json( new JobDto
             {
                 Environment = BuildEnvironment.Windows,
                 JobId = jobId,

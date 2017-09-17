@@ -4,7 +4,7 @@
 
     public class GitVcsJob : IVcsJob
     {
-        public VcsType VcsType => VcsType.Git;
+        public virtual VcsType VcsType => VcsType.Git;
         public string Url { get; set; }
         public BasicAuthenticationCredentials BasicAuthenticationCredentials { get; set; }
     }

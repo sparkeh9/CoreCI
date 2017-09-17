@@ -18,23 +18,23 @@
             this.coreCiHttpClient = coreCiHttpClient;
         }
 
-        public async Task<IEnumerable<JobsDto>> ListAvailableJobsAsync( BuildEnvironment environment )
+        public async Task<IEnumerable<JobDto>> ListAvailableJobsAsync( BuildEnvironment environment )
         {
             var endpointUrl = coreCiHttpClient.BaseApiUrl
                                               .AppendPathSegment( "jobs" )
                                               .SetQueryParam( "environment", environment );
-            var response = await coreCiHttpClient.FetchPagedAsync<JobsDto>( endpointUrl );
+            var response = await coreCiHttpClient.FetchPagedAsync<JobDto>( endpointUrl );
 
             return response;
         }
 
-        public async Task<JobsDto> ReserveFirstAvailableJobAsync( BuildEnvironment environment )
+        public async Task<JobDto> ReserveFirstAvailableJobAsync( BuildEnvironment environment )
         {
             var endpointUrl = coreCiHttpClient.BaseApiUrl
                                               .AppendPathSegment( "jobs" )
                                               .SetQueryParam( "environment", environment );
             var firstPage = await endpointUrl.Authenticate( coreCiHttpClient.Authenticator )
-                                             .GetJsonAsync<PagedResponse<JobsDto>>();
+                                             .GetJsonAsync<PagedResponse<JobDto>>();
 
             var firstJob = firstPage.Values.FirstOrDefault();
 
@@ -46,14 +46,14 @@
             return firstJob;
         }
 
-        public async Task<JobsDto> GetJobDetailsAsync( BuildEnvironment environment )
+        public async Task<JobDto> GetJobDetailsAsync( BuildEnvironment environment )
         {
             var job = await coreCiHttpClient.BaseApiUrl
                                             .AppendPathSegment( "jobs" )
                                             .AppendPathSegment( "details" )
                                             .SetQueryParam( "environment", environment )
                                             .Authenticate( coreCiHttpClient.Authenticator )
-                                            .GetJsonAsync<JobsDto>();
+                                            .GetJsonAsync<JobDto>();
 
             return job;
         }

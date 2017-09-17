@@ -5,7 +5,7 @@
     using Converter;
     using Newtonsoft.Json;
 
-    public class JobsDto
+    public class JobDto
     {
         public BuildEnvironment Environment { get; set; }
         public Guid JobId { get; set; }

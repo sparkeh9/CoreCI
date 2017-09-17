@@ -10,14 +10,18 @@
     public class BuildAgentDaemon : IBuildAgentDaemon
     {
         private readonly ICoreCI coreCiClient;
+        private readonly IVcsAppropriator vcsAppropriator;
         private readonly RetryPolicy waitForeverPolicy;
         public event EventHandler<bool> PollStatusChanged;
 
         private bool isRegistered;
 
-        public BuildAgentDaemon( ICoreCI coreCiClient )
+        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator )
         {
             this.coreCiClient = coreCiClient;
+            this.vcsAppropriator = vcsAppropriator;
+
+            this.vcsAppropriator.OnProgress += ( sender, report ) => { Console.WriteLine( report ); };
 
             waitForeverPolicy = Policy.Handle<Exception>()
                                       .WaitAndRetryForeverAsync( Sleep, onRetry : OnRetry );
@@ -45,7 +49,8 @@
             }
 
             Console.WriteLine( $"Reserved job {job.JobId}" );
-
+            await vcsAppropriator.AcquireAsync( job, @"D:\temp\coreci" );
+            Console.WriteLine( $"Acquired content for job {job.JobId}" );
             EnablePolling();
         }
 

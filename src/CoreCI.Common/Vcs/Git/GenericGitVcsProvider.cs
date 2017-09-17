@@ -1,7 +1,6 @@
 ﻿namespace CoreCI.Common.Vcs.Git
 {
     using System;
-    using Extensions;
     using LibGit2Sharp;
     using Models.Vcs;
 
@@ -14,7 +13,7 @@
 
         public GenericGitVcsProvider( BasicAuthenticationCredentials credentials )
         {
-            if ( credentials.Username.IsNullOrWhiteSpace() )
+            if (credentials?.Username == null )
             {
                 GitCredentials = new DefaultCredentials();
             }
