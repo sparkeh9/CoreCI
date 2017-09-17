@@ -12,5 +12,6 @@
         Task<(JobDto job, JobReservedDto reservation)?> ReserveFirstAvailableJobAsync( BuildEnvironment environment );
         Task<JobDto> GetJobDetailsAsync( ObjectId jobIdt );
         Task<JobReservedDto> ReserveJobAsync( ObjectId jobId );
+        Task<JobDto> FindByIdAsync( ObjectId jobId );
     }
 }

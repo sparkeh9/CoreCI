@@ -14,6 +14,8 @@
         private readonly RetryPolicy waitForeverPolicy;
         public event EventHandler<bool> PollStatusChanged;
 
+        private string lastMessage = string.Empty;
+
         private bool isRegistered;
 
         public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator )
@@ -21,7 +23,14 @@
             this.coreCiClient = coreCiClient;
             this.vcsAppropriator = vcsAppropriator;
 
-            this.vcsAppropriator.OnProgress += ( sender, report ) => { Console.WriteLine( report ); };
+            this.vcsAppropriator.OnProgress += ( sender, report ) =>
+                                               {
+                                                   if ( lastMessage == report )
+                                                       return;
+
+                                                   lastMessage = report;
+                                                   Console.WriteLine( report );
+                                               };
 
             waitForeverPolicy = Policy.Handle<Exception>()
                                       .WaitAndRetryForeverAsync( Sleep, onRetry : OnRetry );

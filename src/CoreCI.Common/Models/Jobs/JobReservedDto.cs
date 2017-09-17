@@ -1,11 +1,15 @@
 ﻿namespace CoreCI.Common.Models.Jobs
 {
-   using System;
-   using MongoDB.Bson;
+    using System;
+    using Common.Newtonsoft.Json;
+    using MongoDB.Bson;
+    using Newtonsoft.Json;
 
     public class JobReservedDto
     {
+        [ JsonConverter( typeof( MongoObjectIdConverter ) ) ]
         public ObjectId JobId { get; set; }
+
         public Guid BuildAgentToken { get; set; }
     }
 }

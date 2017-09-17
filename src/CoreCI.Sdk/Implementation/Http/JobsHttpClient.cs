@@ -29,6 +29,16 @@
             return response;
         }
 
+        public async Task<JobDto> FindByIdAsync( ObjectId jobId )
+        {
+            var response = await coreCiHttpClient.BaseApiUrl
+                                                 .AppendPathSegment( "jobs" )
+                                                 .AppendPathSegment( jobId )
+                                                 .GetJsonAsync<JobDto>();
+
+            return response;
+        }
+
         public async Task<(JobDto job, JobReservedDto reservation)?> ReserveFirstAvailableJobAsync( BuildEnvironment environment )
         {
             var endpointUrl = coreCiHttpClient.BaseApiUrl
@@ -43,8 +53,9 @@
                 return null;
 
             var reservation = await ReserveJobAsync( firstJob.JobId );
+            var hydratedFirstJob = await FindByIdAsync( firstJob.JobId );
 
-            return (firstJob, reservation);
+            return (hydratedFirstJob, reservation);
         }
 
         public async Task<JobDto> GetJobDetailsAsync( ObjectId jobId )

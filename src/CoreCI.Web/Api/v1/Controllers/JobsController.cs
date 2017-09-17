@@ -31,7 +31,7 @@
         }
 
         /// <summary>
-        ///     Lists jobs up for grabsstring
+        ///     Lists jobs up for grabs
         /// </summary>
         /// <returns></returns>
         [ HttpGet ]
