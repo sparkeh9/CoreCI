@@ -31,13 +31,15 @@
                 default:
                     throw new ArgumentOutOfRangeException( nameof( job.Data.VcsType ) );
             }
+
+            CleanDirectoryRecursively( new DirectoryInfo( path ) );
         }
 
         private void AcquireGenericGit( JobDto jobDto, GitVcsJob jobData, string path )
         {
             var genericGitProvider = new GenericGitVcsProvider( jobData.BasicAuthenticationCredentials );
             genericGitProvider.OnProgress += ( sender, report ) => OnProgress?.Invoke( this, report.ToString() );
-            genericGitProvider.Clone( jobData.Url, $"{path}{Path.DirectorySeparatorChar}{jobDto.JobId}" );
+            genericGitProvider.Clone( jobData.Url, $"{path}{Path.DirectorySeparatorChar}" );
         }
 
         private void AcquireBitBucketGit( JobDto jobDto, BitBucketGitVcsJob jobData, string path )
@@ -46,7 +48,18 @@
                 ? new BitBucketGitVcsProvider( jobData.OAuth2Credentials )
                 : new BitBucketGitVcsProvider( jobData.BasicAuthenticationCredentials );
             bitbucketGitProvider.OnProgress += ( sender, report ) => OnProgress?.Invoke( this, report.ToString() );
-            bitbucketGitProvider.Clone( jobData.Url, $"{path}{Path.DirectorySeparatorChar}{jobDto.JobId}" );
+            bitbucketGitProvider.Clone( jobData.Url, $"{path}{Path.DirectorySeparatorChar}" );
+        }
+
+        private static void CleanDirectoryRecursively( DirectoryInfo directory )
+        {
+            foreach ( var subDirectory in directory.GetDirectories() )
+                CleanDirectoryRecursively( subDirectory );
+
+            directory.Attributes = FileAttributes.Normal;
+
+            foreach ( var file in directory.GetFiles() )
+                file.Attributes = FileAttributes.Normal;
         }
     }
 }

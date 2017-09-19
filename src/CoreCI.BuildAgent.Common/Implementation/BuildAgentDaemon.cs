@@ -1,8 +1,10 @@
 ﻿namespace CoreCI.BuildAgent.Common.Implementation
 {
     using System;
+    using System.IO;
     using System.Threading.Tasks;
     using CoreCI.Common.Models;
+    using Exceptions;
     using Polly;
     using Polly.Retry;
     using Sdk;
@@ -11,17 +13,21 @@
     {
         private readonly ICoreCI coreCiClient;
         private readonly IVcsAppropriator vcsAppropriator;
+        private readonly IBuildFileParser buildFileParser;
+        private readonly IBuildProcessor buildProcessor;
+
         private readonly RetryPolicy waitForeverPolicy;
         public event EventHandler<bool> PollStatusChanged;
 
         private string lastMessage = string.Empty;
-
         private bool isRegistered;
 
-        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator )
+        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProcessor buildProcessor )
         {
             this.coreCiClient = coreCiClient;
             this.vcsAppropriator = vcsAppropriator;
+            this.buildFileParser = buildFileParser;
+            this.buildProcessor = buildProcessor;
 
             this.vcsAppropriator.OnProgress += ( sender, report ) =>
                                                {
@@ -31,6 +37,8 @@
                                                    lastMessage = report;
                                                    Console.WriteLine( report );
                                                };
+
+            this.buildProcessor.OnProgress += ( sender, report ) => { Console.WriteLine( report ); };
 
             waitForeverPolicy = Policy.Handle<Exception>()
                                       .WaitAndRetryForeverAsync( Sleep, onRetry : OnRetry );
@@ -57,9 +65,23 @@
                 return;
             }
 
-            Console.WriteLine( $"Reserved job {job.Value.job.JobId}" );
-            await vcsAppropriator.AcquireAsync( job.Value.job, @"D:\temp\coreci" );
-            Console.WriteLine( $"Acquired content for job {job.Value.job.JobId}" );
+            try
+            {
+                string tempPath = GenerateTempPath();
+                Console.WriteLine( $"Reserved job {job.Value.job.JobId}" );
+                await vcsAppropriator.AcquireAsync( job.Value.job, tempPath );
+
+                var buildFile = buildFileParser.ParseBuildFile( tempPath );
+                buildProcessor.DoBuild( job.Value.job, buildFile, tempPath );
+            }
+            catch ( NoBuildFileFoundException e )
+            {
+                Console.WriteLine( e.Message );
+            }
+            catch ( Exception e )
+            {
+                Console.WriteLine( e.Message );
+            }
             EnablePolling();
         }
 
@@ -86,7 +108,7 @@
             Console.WriteLine( $"{exception.Message} - retrying in {calculatedWaitDuration}" );
         }
 
-        private TimeSpan Sleep( int attempt )
+        private static TimeSpan Sleep( int attempt )
         {
             return TimeSpan.FromSeconds( 30 );
         }
@@ -99,6 +121,16 @@
         private void EnablePolling()
         {
             PollStatusChanged?.Invoke( this, true );
+        }
+
+        private string GenerateTempPath()
+        {
+            return Path.GetFullPath( string.Join( Path.DirectorySeparatorChar.ToString(), new[]
+            {
+                Path.GetTempPath(),
+                "coreci",
+                Guid.NewGuid().ToString( "D" )
+            } ) );
         }
     }
 }

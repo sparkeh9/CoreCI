@@ -8,6 +8,8 @@
     using Sdk;
     using Sdk.Implementation.Http;
     using Sdk.Implementation.Http.Authentication;
+    using YamlDotNet.Serialization;
+    using YamlDotNet.Serialization.NamingConventions;
 
     public class BuildAgentDaemonModule : Module
     {
@@ -33,9 +35,18 @@
                                   return new CoreCIHttpClient( credentials.Url ).WithAuthenticator( new OAuthBearerAuthenticator( credentials.Token ) );
                               } ).As<ICoreCI>();
 
-            builder.RegisterType<VcsAppropriator>().As<IVcsAppropriator>();
-            builder.RegisterType<BuildAgentDaemon>().As<IBuildAgentDaemon>();
+            builder.Register( ctx =>
+                                  new DeserializerBuilder()
+                                      .WithNamingConvention( new CamelCaseNamingConvention() )
+                                      .Build() )
+                   .As<Deserializer>();
+
             builder.RegisterType<WindowsBuildAgentService>();
+            builder.RegisterType<BuildAgentDaemon>().As<IBuildAgentDaemon>();
+
+            builder.RegisterType<VcsAppropriator>().As<IVcsAppropriator>();
+            builder.RegisterType<BuildFileParser>().As<IBuildFileParser>();
+            builder.RegisterType<BuildProcessor>().As<IBuildProcessor>();
         }
     }
 }
