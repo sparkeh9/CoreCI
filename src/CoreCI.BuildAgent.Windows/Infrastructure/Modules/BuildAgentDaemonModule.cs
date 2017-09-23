@@ -5,6 +5,7 @@
     using Common;
     using Common.Implementation;
     using Common.Models;
+    using Common.Models.Docker;
     using Sdk;
     using Sdk.Implementation.Http;
     using Sdk.Implementation.Http.Authentication;
@@ -28,6 +29,19 @@
                                   };
                               } ).As<ApiCredentials>();
 
+            builder.Register( ctx =>
+                              {
+                                  var config = ctx.Resolve<Configuration>();
+                                  var dockerHost = config.AppSettings.Settings[ "dockerHost" ];
+                                  var certificatePath = config.AppSettings.Settings[ "dockerCertificatePath" ];
+
+                                  return new DockerConfiguration
+                                  {
+                                      RemoteEndpoint = dockerHost?.Value,
+                                      CertificatePath = certificatePath?.Value
+                                  };
+                              } ).As<DockerConfiguration>();
+
 
             builder.Register( ctx =>
                               {
@@ -46,8 +60,9 @@
 
             builder.RegisterType<VcsAppropriator>().As<IVcsAppropriator>();
             builder.RegisterType<BuildFileParser>().As<IBuildFileParser>();
-            builder.RegisterType<BuildProcessor>().As<IBuildProcessor>();
             builder.RegisterType<BuildProgressReporter>().As<IBuildProgressReporter>();
+            builder.RegisterType<NativeBuildProcessor>().SingleInstance();
+            builder.RegisterType<DockerBuildProcessor>().SingleInstance();
         }
     }
 }

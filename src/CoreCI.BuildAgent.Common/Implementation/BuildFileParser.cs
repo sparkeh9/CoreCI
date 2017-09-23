@@ -18,7 +18,9 @@
         {
             string filePath = $"{path}{Path.DirectorySeparatorChar}coreci.yml";
             if ( !File.Exists( filePath ) )
+            {
                 throw new NoBuildFileFoundException();
+            }
 
             string text = File.ReadAllText( filePath );
             var buildFile = deserialiser.Deserialize<BuildFile>( text );

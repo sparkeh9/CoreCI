@@ -9,7 +9,7 @@
 
     public class Program
     {
-        private static IContainer Container;
+        private static IContainer container;
 
         private static void BuildContainer( Configuration config )
         {
@@ -17,7 +17,7 @@
             builder.RegisterModule<BuildAgentDaemonModule>();
             builder.RegisterInstance( config )
                    .As<Configuration>();
-            Container = builder.Build();
+            container = builder.Build();
         }
 
         public static void Main( string[] args )
@@ -27,7 +27,7 @@
 
             HostFactory.Run( configure =>
                              {
-                                 configure.UseAutofacContainer( Container );
+                                 configure.UseAutofacContainer( container );
                                  configure.AddCommandLineDefinition( "apiUrl", arg =>
                                                                                {
                                                                                    config.AppSettings.Settings.Remove( "apiUrl" );
@@ -40,6 +40,18 @@
                                                                                      config.AppSettings.Settings.Add( "apiToken", arg );
                                                                                      config.Save( ConfigurationSaveMode.Modified );
                                                                                  } );
+                                 configure.AddCommandLineDefinition( "dockerHost", arg =>
+                                                                                   {
+                                                                                       config.AppSettings.Settings.Remove( "dockerHost" );
+                                                                                       config.AppSettings.Settings.Add( "dockerHost", arg );
+                                                                                       config.Save( ConfigurationSaveMode.Modified );
+                                                                                   } );
+                                 configure.AddCommandLineDefinition( "dockerCertificatePath", arg =>
+                                                                                              {
+                                                                                                  config.AppSettings.Settings.Remove( "dockerCertificatePath" );
+                                                                                                  config.AppSettings.Settings.Add( "dockerCertificatePath", arg );
+                                                                                                  config.Save( ConfigurationSaveMode.Modified );
+                                                                                              } );
                                  configure.ApplyCommandLine();
                                  configure.Service<WindowsBuildAgentService>( service =>
                                                                               {

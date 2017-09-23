@@ -11,7 +11,7 @@
         public override string ToString()
         {
             var size = ByteSize.FromBytes( BytesReceived );
-            return $"Progress: {ObjectsReceived}/{TotalObjects} ({size.LargestWholeNumberValue} {size.LargestWholeNumberSymbol})";
+            return size.ToString();
         }
     }
 }

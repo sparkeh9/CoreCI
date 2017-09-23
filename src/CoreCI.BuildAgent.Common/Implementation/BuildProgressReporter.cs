@@ -1,27 +1,35 @@
 ﻿namespace CoreCI.BuildAgent.Common.Implementation
 {
     using System;
+    using System.ComponentModel;
     using System.Threading.Tasks;
     using Models;
 
     public class BuildProgressReporter : IBuildProgressReporter
     {
         private readonly (ConsoleColor foreground, ConsoleColor background) originalSettings;
+        private static readonly BackgroundWorker backgroundWorker = new BackgroundWorker();
 
         public BuildProgressReporter()
         {
             originalSettings = (Console.ForegroundColor, Console.BackgroundColor);
+            backgroundWorker.DoWork += BackgroundWorkerOnDoWork;
         }
 
         public async Task ReportAsync( JobProgressDto progressItem )
         {
-            await ReportAsync( null, progressItem );
+            backgroundWorker.RunWorkerAsync( progressItem );
+            await Task.FromResult( 0 );
         }
 
-        public async Task ReportAsync( string buildAgentToken, JobProgressDto progressItem )
+        private void BackgroundWorkerOnDoWork( object sender, DoWorkEventArgs e )
         {
-            await Task.FromResult( 0 );
-            switch ( progressItem.ProgressType )
+            if ( !( e.Argument is JobProgressDto dto ) )
+            {
+                return;
+            }
+
+            switch ( dto.ProgressType )
             {
                 case ProgressType.Command:
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -38,9 +46,11 @@
                 case ProgressType.Warning:
                     Console.ForegroundColor = ConsoleColor.Magenta;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
-            Console.WriteLine( progressItem.Message );
+            Console.WriteLine( dto.Message );
             Console.ForegroundColor = originalSettings.foreground;
             Console.BackgroundColor = originalSettings.background;
         }

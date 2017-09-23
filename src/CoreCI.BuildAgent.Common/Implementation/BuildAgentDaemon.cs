@@ -4,64 +4,69 @@
     using System.IO;
     using System.Threading.Tasks;
     using CoreCI.Common.Models;
-    using Exceptions;
     using Models;
+    using Models.BuildFile;
     using Polly;
     using Polly.Retry;
     using Sdk;
 
     public class BuildAgentDaemon : IBuildAgentDaemon
     {
-        private readonly ICoreCI coreCiClient;
-        private readonly IVcsAppropriator vcsAppropriator;
         private readonly IBuildFileParser buildFileParser;
-        private readonly IBuildProcessor buildProcessor;
-        private readonly IBuildProgressReporter progressReporter;
 
+        private readonly ICoreCI coreCiClient;
+        private readonly DockerBuildProcessor dockerBuildProcessor;
+        private readonly NativeBuildProcessor nativeBuildProcessor;
+        private readonly IBuildProgressReporter progressReporter;
+        private readonly IVcsAppropriator vcsAppropriator;
         private readonly RetryPolicy waitForeverPolicy;
-        public event EventHandler<bool> PollStatusChanged;
+        private IBuildProcessor buildProcessor;
 
         private bool isRegistered;
 
-        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProcessor buildProcessor, IBuildProgressReporter progressReporter )
+        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProgressReporter progressReporter, DockerBuildProcessor dockerBuildProcessor, NativeBuildProcessor nativeBuildProcessor )
         {
             this.coreCiClient = coreCiClient;
             this.vcsAppropriator = vcsAppropriator;
             this.buildFileParser = buildFileParser;
-            this.buildProcessor = buildProcessor;
             this.progressReporter = progressReporter;
+            this.dockerBuildProcessor = dockerBuildProcessor;
+            this.nativeBuildProcessor = nativeBuildProcessor;
 
-            this.vcsAppropriator.OnProgress += ( sender, report ) => { progressReporter.ReportAsync( "buildAgentToken", report ); };
-            this.buildProcessor.OnProgress += ( sender, report ) => { progressReporter.ReportAsync( "buildAgentToken", report ); };
-
+            this.vcsAppropriator.OnProgress += ( sender, report ) => { progressReporter.ReportAsync( report ); };
             waitForeverPolicy = Policy.Handle<Exception>()
                                       .WaitAndRetryForeverAsync( Sleep, onRetry : async ( exception, span ) => { await OnRetryAsync( exception, span ); } );
         }
 
+        public event EventHandler<bool> PollStatusChanged;
+
         public async Task InvokeAsync( BuildEnvironment environment )
         {
-            DisablePolling();
-
-            if ( !isRegistered )
-                await waitForeverPolicy.ExecuteAsync( async () =>
-                                                      {
-                                                          await progressReporter.ReportAsync( new JobProgressDto( "Attempting to register build agent with coordinator" ) );
-                                                          await coreCiClient.Agents.RegisterAsync( environment );
-                                                          isRegistered = true;
-                                                      } );
-
-            await progressReporter.ReportAsync( new JobProgressDto( "Checking for available jobs" ) );
-
-            var job = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environment );
-
-            if ( !job.HasValue )
-            {
-                EnablePolling();
-                return;
-            }
-
             try
             {
+                DisablePolling();
+
+                if ( !isRegistered )
+                {
+                    await waitForeverPolicy.ExecuteAsync( async () =>
+                                                          {
+                                                              await progressReporter.ReportAsync( new JobProgressDto( "Attempting to register build agent with coordinator" ) );
+                                                              await coreCiClient.Agents.RegisterAsync( environment );
+                                                              await progressReporter.ReportAsync( new JobProgressDto( "Registered with coordinator" ) );
+                                                              isRegistered = true;
+                                                          } );
+                }
+
+                await progressReporter.ReportAsync( new JobProgressDto( "Checking for available jobs", ProgressType.Command ) );
+
+                var job = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environment );
+
+                if ( !job.HasValue )
+                {
+                    EnablePolling();
+                    return;
+                }
+
                 string tempPath = GenerateTempPath();
 
                 await progressReporter.ReportAsync( new JobProgressDto
@@ -69,18 +74,11 @@
                     Message = $"Reserved job {job.Value.job.JobId}",
                     ProgressType = ProgressType.Informational
                 } );
-                await vcsAppropriator.AcquireAsync( job.Value.job, tempPath );
 
+                await vcsAppropriator.AcquireAsync( job.Value.job, tempPath );
                 var buildFile = buildFileParser.ParseBuildFile( tempPath );
-                buildProcessor.DoBuild( job.Value.job, buildFile, tempPath );
-            }
-            catch ( NoBuildFileFoundException e )
-            {
-                await progressReporter.ReportAsync( new JobProgressDto
-                {
-                    Message = e.Message,
-                    ProgressType = ProgressType.Error
-                } );
+                InitialiseBuildProcessor( buildFile );
+                await buildProcessor.DoBuildAsync( job.Value.job, buildFile, tempPath );
             }
             catch ( Exception e )
             {
@@ -90,7 +88,14 @@
                     ProgressType = ProgressType.Error
                 } );
             }
-            EnablePolling();
+            finally
+            {
+                if ( buildProcessor != null )
+                {
+                    buildProcessor.OnProgress -= BuildProcessorOnProgress;
+                }
+                EnablePolling();
+            }
         }
 
         public async Task StopAsync()
@@ -98,7 +103,9 @@
             DisablePolling();
 
             if ( !isRegistered )
+            {
                 return;
+            }
 
             try
             {
@@ -108,6 +115,26 @@
             {
                 Console.WriteLine( e.Message );
             }
+        }
+
+        private void InitialiseBuildProcessor( BuildFile buildFile )
+        {
+            if ( buildFile.BuildMode == BuildMode.Native )
+            {
+                buildProcessor = nativeBuildProcessor;
+            }
+            else
+            {
+                buildProcessor = dockerBuildProcessor;
+            }
+
+            buildProcessor.OnProgress -= BuildProcessorOnProgress;
+            buildProcessor.OnProgress += BuildProcessorOnProgress;
+        }
+
+        private void BuildProcessorOnProgress( object o, JobProgressDto report )
+        {
+            progressReporter.ReportAsync( report );
         }
 
         private async Task OnRetryAsync( Exception exception, TimeSpan calculatedWaitDuration )

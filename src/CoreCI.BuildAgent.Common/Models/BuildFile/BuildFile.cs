@@ -8,6 +8,9 @@
         [ YamlMember( Alias = "mode" ) ]
         public BuildMode BuildMode { get; set; }
 
-        public IEnumerable<string> Commands { get; set; }
+        [ YamlMember( Alias = "image" ) ]
+        public DockerImage DockerImage { get; set; }
+
+        public IEnumerable<string> Commands { get; set; } = new List<string>();
     }
 }

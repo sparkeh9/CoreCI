@@ -26,7 +26,8 @@
             ConventionRegistry.Register( mongoDbOptions.DatabaseName, new ConventionPack
             {
                 new CamelCaseElementNameConvention(),
-                new EnumRepresentationConvention( BsonType.String )
+                new EnumRepresentationConvention( BsonType.String ),
+                new IgnoreExtraElementsConvention( true )
             }, t => true );
 
             builder.Register( cc => new MongoClient( mongoDbOptions.ConnectionString ) )

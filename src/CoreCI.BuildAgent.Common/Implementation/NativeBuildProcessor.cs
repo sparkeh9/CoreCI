@@ -2,39 +2,34 @@ namespace CoreCI.BuildAgent.Common.Implementation
 {
     using System;
     using System.Diagnostics;
+    using System.Threading.Tasks;
     using CoreCI.Common.Models;
     using CoreCI.Common.Models.Jobs;
     using Models;
     using Models.BuildFile;
 
-    public class BuildProcessor : IBuildProcessor
+    public class NativeBuildProcessor : IBuildProcessor
     {
         public event EventHandler<JobProgressDto> OnProgress;
 
-        public void DoBuild( JobDto job, BuildFile buildFile, string path )
-        {
-            if ( buildFile.BuildMode == BuildMode.Native )
-            {
-                DoNativeBuild( job, buildFile, path );
-            }
-        }
-
-        private void DoNativeBuild( JobDto job, BuildFile buildFile, string path )
+        public async Task DoBuildAsync( JobDto job, BuildFile buildFile, string path )
         {
             foreach ( string command in buildFile.Commands )
             {
-                RunShellCommand( job.Environment, path, command );
+                await RunShellCommand( job.Environment, path, command );
             }
         }
 
-        private void RunShellCommand( BuildEnvironment environment, string path, string command )
+        private Task RunShellCommand( BuildEnvironment environment, string path, string command )
         {
+            var tcs = new TaskCompletionSource<object>();
             string shellPath = environment == BuildEnvironment.Windows
                 ? "powershell.exe"
                 : "/bin/bash";
 
             var process = new Process
             {
+                EnableRaisingEvents = true,
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = shellPath,
@@ -53,6 +48,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
                 ProgressType = ProgressType.Command,
                 Message = command
             } );
+
             process.OutputDataReceived += ( sender, args ) =>
                                           {
                                               OnProgress?.Invoke( this, new JobProgressDto
@@ -61,6 +57,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
                                                   Message = args.Data
                                               } );
                                           };
+
             process.ErrorDataReceived += ( sender, args ) =>
                                          {
                                              OnProgress?.Invoke( this, new JobProgressDto
@@ -69,11 +66,13 @@ namespace CoreCI.BuildAgent.Common.Implementation
                                                  Message = args.Data
                                              } );
                                          };
+            process.Exited += ( sender, args ) => { tcs.SetResult( null ); };
 
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-            process.WaitForExit();
+
+            return tcs.Task;
         }
     }
 }
