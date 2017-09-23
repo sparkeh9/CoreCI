@@ -47,6 +47,7 @@
             builder.RegisterType<VcsAppropriator>().As<IVcsAppropriator>();
             builder.RegisterType<BuildFileParser>().As<IBuildFileParser>();
             builder.RegisterType<BuildProcessor>().As<IBuildProcessor>();
+            builder.RegisterType<BuildProgressReporter>().As<IBuildProgressReporter>();
         }
     }
 }
