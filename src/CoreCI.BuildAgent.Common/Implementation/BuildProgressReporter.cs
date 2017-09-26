@@ -3,6 +3,7 @@
     using System;
     using System.ComponentModel;
     using System.Threading.Tasks;
+    using CoreCI.Common.Extensions;
     using Models;
 
     public class BuildProgressReporter : IBuildProgressReporter
@@ -50,7 +51,7 @@
                     throw new ArgumentOutOfRangeException();
             }
 
-            Console.WriteLine( dto.Message );
+            Console.WriteLine( dto.Message.RemoveControlCharacters() );
             Console.ForegroundColor = originalSettings.foreground;
             Console.BackgroundColor = originalSettings.background;
         }

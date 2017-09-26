@@ -39,7 +39,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
 
         public async Task DoBuildAsync( JobDto job, BuildFile buildFile, string path )
         {
-            job.Environment = BuildEnvironment.Linux;
+            job.Environment = BuildEnvironment.Windows;
             await GenerateStepScripts( job, buildFile, path );
 
             var foundImage = await dockerClient.Images.ListImagesAsync( new ImagesListParameters
@@ -74,11 +74,9 @@ namespace CoreCI.BuildAgent.Common.Implementation
                 Message = $"Creating container from image {buildFile.DockerImage}"
             } );
 
-            string fileExtension = job.Environment == BuildEnvironment.Windows
-                ? "ps1"
-                : "sh";
-
-            string filename = $"/workspace/coreci_build_steps.{fileExtension}";
+            string filename = job.Environment == BuildEnvironment.Windows
+                ? @"c:\workspace\coreci_build_steps.ps1"
+                : "/workspace/coreci_build_steps.sh";
 
             var container = await dockerClient.Containers
                                               .CreateContainerAsync( new CreateContainerParameters( new Config
@@ -97,7 +95,12 @@ namespace CoreCI.BuildAgent.Common.Implementation
 //                                  Env = step.EnvironmentVariables?.Select( x => $"{x.Key}={x.Value}" ).ToList(),
                                                                          Volumes = new Dictionary<string, EmptyStruct>
                                                                          {
-                                                                             { "/workspace", new EmptyStruct() }
+                                                                             {
+                                                                                 job.Environment == BuildEnvironment.Windows
+                                                                                     ? @"c:\workspace"
+                                                                                     : "/workspace",
+                                                                                 new EmptyStruct()
+                                                                             }
                                                                          }
                                                                      } )
                                                                      {
@@ -105,7 +108,9 @@ namespace CoreCI.BuildAgent.Common.Implementation
                                                                          {
                                                                              Binds = new[]
                                                                              {
-                                                                                 $"{path}:/workspace"
+                                                                                 job.Environment == BuildEnvironment.Windows
+                                                                                     ? $@"{path}:c:\workspace"
+                                                                                     : $"{path}:/workspace"
                                                                              }
                                                                          }
                                                                      } );
@@ -138,8 +143,8 @@ namespace CoreCI.BuildAgent.Common.Implementation
             if ( message.Progress == null )
                 return;
 
-            var total = (int) ( message.Progress?.Total == 0 ? 100 : message.Progress?.Total ?? 0 );
-            int current = message.Status == "Download complete" ? total : (int) ( message.Progress?.Current ?? 100 );
+            var total = (int) ( message.Progress?.Total == 0 ? 100 : message.Progress?.Total );
+            int current = message.Status == "Download complete" ? total : (int) message.Progress?.Current;
 
             var progressBar = progressBars.ContainsKey( message.ID )
                 ? progressBars[ message.ID ]
@@ -210,7 +215,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
                 OnProgress?.Invoke( this, new JobProgressDto
                 {
                     ProgressType = ProgressType.Informational,
-                    Message = line.RemoveControlCharacters()
+                    Message = line
                 } );
             }
         }
@@ -225,21 +230,20 @@ namespace CoreCI.BuildAgent.Common.Implementation
 
             using ( TextWriter tw = File.CreateText( filename ) )
             {
-                tw.NewLine = "\n";
-
                 if ( job.Environment == BuildEnvironment.Windows )
                 {
-                    await tw.WriteLineAsync( "Push-Location $folder" );
+                    tw.NewLine = "\r\n";
+
                     await tw.WriteLineAsync( "Set-PSDebug -Trace 1" );
+                    await tw.WriteLineAsync( @"cd c:\workspace" );
                 }
                 else
                 {
+                    tw.NewLine = "\n";
                     await tw.WriteLineAsync( "#!/bin/sh" );
                     await tw.WriteLineAsync( "set -x" );
                     await tw.WriteLineAsync( @"cd /workspace" );
                 }
-
-                await tw.WriteLineAsync( "ls -al" );
 
                 foreach ( string command in buildFile.Commands )
                 {

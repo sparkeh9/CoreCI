@@ -52,6 +52,7 @@
             builder.Register( ctx =>
                                   new DeserializerBuilder()
                                       .WithNamingConvention( new CamelCaseNamingConvention() )
+                                      .IgnoreUnmatchedProperties()
                                       .Build() )
                    .As<Deserializer>();
 

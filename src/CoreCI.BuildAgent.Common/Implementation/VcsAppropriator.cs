@@ -105,8 +105,11 @@
 
             directory.Attributes = FileAttributes.Normal;
 
+
             foreach ( var file in directory.GetFiles() )
+            {
                 file.Attributes = FileAttributes.Normal;
+            }
         }
     }
 }
