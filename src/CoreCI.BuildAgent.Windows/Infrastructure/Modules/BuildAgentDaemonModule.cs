@@ -62,6 +62,7 @@
             builder.RegisterType<VcsAppropriator>().As<IVcsAppropriator>();
             builder.RegisterType<BuildFileParser>().As<IBuildFileParser>();
             builder.RegisterType<BuildProgressReporter>().As<IBuildProgressReporter>();
+            builder.RegisterType<DockerBuildScriptGenerator>().As<IDockerBuildScriptGenerator>();
             builder.RegisterType<NativeBuildProcessor>().SingleInstance();
             builder.RegisterType<DockerBuildProcessor>().SingleInstance();
         }

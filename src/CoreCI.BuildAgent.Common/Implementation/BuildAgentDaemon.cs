@@ -24,7 +24,8 @@
 
         private bool isRegistered;
 
-        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProgressReporter progressReporter, DockerBuildProcessor dockerBuildProcessor, NativeBuildProcessor nativeBuildProcessor )
+        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProgressReporter progressReporter, DockerBuildProcessor dockerBuildProcessor,
+                                 NativeBuildProcessor nativeBuildProcessor )
         {
             this.coreCiClient = coreCiClient;
             this.vcsAppropriator = vcsAppropriator;
