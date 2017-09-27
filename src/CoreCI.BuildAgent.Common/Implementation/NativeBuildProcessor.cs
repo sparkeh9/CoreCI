@@ -5,7 +5,6 @@ namespace CoreCI.BuildAgent.Common.Implementation
     using System.Threading.Tasks;
     using CoreCI.Common.Models;
     using CoreCI.Common.Models.Jobs;
-    using Models;
     using Models.BuildFile;
 
     public class NativeBuildProcessor : IBuildProcessor
@@ -45,7 +44,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
 
             OnProgress?.Invoke( this, new JobProgressDto
             {
-                ProgressType = ProgressType.Command,
+                JobProgressType = JobProgressType.Command,
                 Message = command
             } );
 
@@ -53,7 +52,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
                                           {
                                               OnProgress?.Invoke( this, new JobProgressDto
                                               {
-                                                  ProgressType = ProgressType.Informational,
+                                                  JobProgressType = JobProgressType.Informational,
                                                   Message = args.Data
                                               } );
                                           };
@@ -62,7 +61,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
                                          {
                                              OnProgress?.Invoke( this, new JobProgressDto
                                              {
-                                                 ProgressType = ProgressType.Error,
+                                                 JobProgressType = JobProgressType.Error,
                                                  Message = args.Data
                                              } );
                                          };

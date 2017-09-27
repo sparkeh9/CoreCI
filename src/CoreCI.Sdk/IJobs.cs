@@ -13,5 +13,6 @@
         Task<JobDto> GetJobDetailsAsync( ObjectId jobIdt );
         Task<JobReservedDto> ReserveJobAsync( ObjectId jobId );
         Task<JobDto> FindByIdAsync( ObjectId jobId );
+        Task ReportAsync( JobProgressDto jobProgress );
     }
 }

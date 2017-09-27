@@ -6,5 +6,6 @@
     {
         public int Page { get; set; } = 1;
         public BuildEnvironment? Environment { get; set; }
+        public JobStatus JobStatus { get; set; } = JobStatus.Available;
     }
 }

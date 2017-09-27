@@ -9,7 +9,7 @@
     using Infrastructure.Extensions;
     using LinqKit;
     using Model;
-    using Models;
+    using Models.Jobs;
     using MongoDb;
     using MongoDB.Bson;
     using MongoDB.Driver;
@@ -29,6 +29,11 @@
                                       .SingleOrDefaultAsync( cancellationToken );
         }
 
+        public async Task PersistAsync( Job job, CancellationToken cancellationToken = new CancellationToken() )
+        {
+            await jobCollection.ReplaceOneAsync( x => x.Id == job.Id, job, cancellationToken : cancellationToken );
+        }
+
         public async Task CreateAsync( Job job, CancellationToken cancellationToken = new CancellationToken() )
         {
             await jobCollection.InsertOneAsync( job, cancellationToken : cancellationToken );
@@ -36,14 +41,19 @@
 
         public async Task<IReadOnlyCollection<Job>> ListByAsync( JobQuery query, CancellationToken cancellationToken = new CancellationToken() )
         {
-            var meh = await GenerateExpression( query ).Skip( ( query.Page.EnsureAtLeast( 1 ) - 1 ) * 10 )
-                                                       .Limit( 10 )
-                                                       .ToListAsync( cancellationToken );
-
-            return meh;
+            return await GenerateListQueryExpression( query ).Skip( ( query.Page.EnsureAtLeast( 1 ) - 1 ) * 10 )
+                                                             .Limit( 10 )
+                                                             .ToListAsync( cancellationToken );
         }
 
-        private IFindFluent<Job, Job> GenerateExpression( JobQuery query )
+        public async Task AppendReportProgressAsync( JobProgressDto jobProgress, CancellationToken cancellationToken = new CancellationToken() )
+        {
+            await jobCollection.FindOneAndUpdateAsync( x => x.BuildAgentToken == jobProgress.BuildAgentToken,
+                                                       Builders<Job>.Update
+                                                                    .Push( x => x.Logs, jobProgress ), cancellationToken : cancellationToken );
+        }
+
+        private IFindFluent<Job, Job> GenerateListQueryExpression( JobQuery query )
         {
             var filter = BuildFilter( query );
 
@@ -62,9 +72,6 @@
 
         private Expression<Func<Job, bool>> BuildFilter( JobQuery query )
         {
-            if ( !query.HasFilter )
-                return x => true;
-
             var expression = PredicateBuilder.New<Job>();
 
             if ( query.BuildEnvironment.HasValue )

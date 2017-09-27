@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using CoreCI.Common.Models.Jobs;
-    using Models;
     using Models.BuildFile;
 
     public interface IBuildProcessor

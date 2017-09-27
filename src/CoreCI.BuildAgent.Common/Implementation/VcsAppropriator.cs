@@ -7,7 +7,6 @@
     using CoreCI.Common.Models.Jobs;
     using CoreCI.Common.Vcs.Git;
     using Konsole;
-    using Models;
 
     public class VcsAppropriator : IVcsAppropriator
     {
@@ -65,7 +64,7 @@
 
             OnProgress?.Invoke( this, new JobProgressDto
             {
-                ProgressType = ProgressType.Command,
+                JobProgressType = JobProgressType.Command,
                 Message = $"Cloning {jobData.Url} into {path}"
             } );
             genericGitProvider.Clone( jobData.Url, $"{path}{Path.DirectorySeparatorChar}" );
@@ -91,7 +90,7 @@
 
             OnProgress?.Invoke( this, new JobProgressDto
             {
-                ProgressType = ProgressType.Command,
+                JobProgressType = JobProgressType.Command,
                 Message = $"Cloning {jobData.Url} into {path}"
             } );
             bitbucketGitProvider.Clone( jobData.Url, path );
@@ -104,7 +103,6 @@
                 CleanDirectoryRecursively( subDirectory );
 
             directory.Attributes = FileAttributes.Normal;
-
 
             foreach ( var file in directory.GetFiles() )
             {

@@ -13,7 +13,6 @@ namespace CoreCI.BuildAgent.Common.Implementation
     using Docker.DotNet.X509;
     using Extentions;
     using Konsole;
-    using Models;
     using Models.BuildFile;
     using Models.Docker;
 
@@ -47,7 +46,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
 
             OnProgress?.Invoke( this, new JobProgressDto
             {
-                ProgressType = ProgressType.Success,
+                JobProgressType = JobProgressType.Success,
                 Message = "Build completed"
             } );
         }
@@ -69,7 +68,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
         {
             OnProgress?.Invoke( this, new JobProgressDto
             {
-                ProgressType = ProgressType.Command,
+                JobProgressType = JobProgressType.Command,
                 Message = $"Creating container from image {buildFile.DockerImage}"
             } );
 
@@ -118,7 +117,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
             {
                 OnProgress?.Invoke( this, new JobProgressDto
                 {
-                    ProgressType = ProgressType.Command,
+                    JobProgressType = JobProgressType.Command,
                     Message = $"Pulling image {buildFile.DockerImage}"
                 } );
 
@@ -200,7 +199,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
             {
                 OnProgress?.Invoke( this, new JobProgressDto
                 {
-                    ProgressType = ProgressType.Informational,
+                    JobProgressType = JobProgressType.Informational,
                     Message = line
                 } );
             }

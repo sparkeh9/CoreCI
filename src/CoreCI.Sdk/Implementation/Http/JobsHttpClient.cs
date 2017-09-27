@@ -1,6 +1,5 @@
 ﻿namespace CoreCI.Sdk.Implementation.Http
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -80,6 +79,16 @@
                                                        .ReceiveJson<JobReservedDto>();
 
             return jobReservedDto;
+        }
+
+        public async Task ReportAsync( JobProgressDto jobProgress )
+        {
+            var response = await coreCiHttpClient.BaseApiUrl
+                                                 .AppendPathSegment( "jobs" )
+                                                 .AppendPathSegment( "reserve" )
+                                                 .Authenticate( coreCiHttpClient.Authenticator )
+                                                 .PostJsonAsync( jobProgress );
+            response.EnsureSuccessStatusCode();
         }
     }
 }

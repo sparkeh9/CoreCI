@@ -1,7 +1,7 @@
 namespace CoreCI.BuildAgent.Common
 {
     using System.Threading.Tasks;
-    using Models;
+    using CoreCI.Common.Models.Jobs;
 
     public interface IBuildProgressReporter
     {

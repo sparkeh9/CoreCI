@@ -4,7 +4,7 @@
     using System.IO;
     using System.Threading.Tasks;
     using CoreCI.Common.Models;
-    using Models;
+    using CoreCI.Common.Models.Jobs;
     using Models.BuildFile;
     using Polly;
     using Polly.Retry;
@@ -58,7 +58,7 @@
                                                           } );
                 }
 
-                await progressReporter.ReportAsync( new JobProgressDto( "Checking for available jobs", ProgressType.Command ) );
+                await progressReporter.ReportAsync( new JobProgressDto( "Checking for available jobs", JobProgressType.Command ) );
 
                 var job = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environment );
 
@@ -73,7 +73,7 @@
                 await progressReporter.ReportAsync( new JobProgressDto
                 {
                     Message = $"Reserved job {job.Value.job.JobId}",
-                    ProgressType = ProgressType.Informational
+                    JobProgressType = JobProgressType.Informational
                 } );
 
                 await vcsAppropriator.AcquireAsync( job.Value.job, tempPath );
@@ -86,7 +86,7 @@
                 await progressReporter.ReportAsync( new JobProgressDto
                 {
                     Message = e.Message,
-                    ProgressType = ProgressType.Error
+                    JobProgressType = JobProgressType.Error
                 } );
             }
             finally
@@ -144,7 +144,7 @@
             await progressReporter.ReportAsync( new JobProgressDto
             {
                 Message = $"{exception.Message} - retrying in {calculatedWaitDuration}",
-                ProgressType = ProgressType.Error
+                JobProgressType = JobProgressType.Error
             } );
         }
 

@@ -1,11 +1,8 @@
 ﻿namespace CoreCI.Sdk.Implementation.Http
 {
-    using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Common.Models;
     using Common.Models.Agents;
-    using Common.Models.Jobs;
     using Flurl;
     using Flurl.Http;
 

@@ -1,9 +1,7 @@
 ﻿namespace CoreCI.Sdk.Implementation.Http
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Common;
     using Flurl;
     using Flurl.Http;
     using Common.Extensions;

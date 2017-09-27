@@ -15,5 +15,7 @@
 
         [ JsonConverter( typeof( VcsJobConverter ) ) ]
         public VcsJob Data { get; set; }
+
+        public string BuildAgentToken { get; set; }
     }
 }

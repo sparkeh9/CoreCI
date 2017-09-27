@@ -10,6 +10,6 @@
         [ JsonConverter( typeof( MongoObjectIdConverter ) ) ]
         public ObjectId JobId { get; set; }
 
-        public Guid BuildAgentToken { get; set; }
+        public string BuildAgentToken { get; set; }
     }
 }
