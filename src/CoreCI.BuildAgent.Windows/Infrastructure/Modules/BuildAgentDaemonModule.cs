@@ -65,6 +65,12 @@
             builder.RegisterType<DockerBuildScriptGenerator>().As<IDockerBuildScriptGenerator>();
             builder.RegisterType<NativeBuildProcessor>().SingleInstance();
             builder.RegisterType<DockerBuildProcessor>().SingleInstance();
+
+#if DEBUG
+            builder.RegisterType<DebugOutputConsoleReporter>().As<IConsoleProgressReporter>();
+#else
+            builder.RegisterType<NullConsoleReporter>().As<IConsoleProgressReporter>();
+#endif
         }
     }
 }

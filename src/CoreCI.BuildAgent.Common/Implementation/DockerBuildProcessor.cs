@@ -2,7 +2,6 @@ namespace CoreCI.BuildAgent.Common.Implementation
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
     using CoreCI.Common.Extensions;
@@ -15,6 +14,7 @@ namespace CoreCI.BuildAgent.Common.Implementation
     using Konsole;
     using Models.BuildFile;
     using Models.Docker;
+    using System.Linq;
 
     public class DockerBuildProcessor : IBuildProcessor
     {

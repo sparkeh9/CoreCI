@@ -6,5 +6,6 @@ namespace CoreCI.BuildAgent.Common
     public interface IBuildProgressReporter
     {
         Task ReportAsync( JobProgressDto progressItem );
+        void UseBuildAgentToken( string token );
     }
 }

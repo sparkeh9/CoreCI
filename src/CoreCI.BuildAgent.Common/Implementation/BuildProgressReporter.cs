@@ -2,30 +2,41 @@
 {
     using System;
     using System.ComponentModel;
+    using System.Threading;
     using System.Threading.Tasks;
     using CoreCI.Common.Models.Jobs;
     using Sdk;
 
     public class BuildProgressReporter : IBuildProgressReporter
     {
-        private readonly (ConsoleColor foreground, ConsoleColor background) originalSettings;
+        private readonly ICoreCI coreCiClient;
+        private readonly IConsoleProgressReporter consoleReporter;
+        private string buildAgentToken;
         private static readonly BackgroundWorker backgroundWorker = new BackgroundWorker();
 
-        private readonly ICoreCI coreCiClient;
-
-        public BuildProgressReporter( ICoreCI coreCiClient )
+        public BuildProgressReporter( ICoreCI coreCiClient, IConsoleProgressReporter consoleReporter )
         {
             this.coreCiClient = coreCiClient;
-            originalSettings = (Console.ForegroundColor, Console.BackgroundColor);
-
-
+            this.consoleReporter = consoleReporter;
             backgroundWorker.DoWork += BackgroundWorkerOnDoWorkAsync;
         }
 
         public async Task ReportAsync( JobProgressDto progressItem )
         {
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter( TimeSpan.FromSeconds( 10 ) );
+            while ( backgroundWorker.IsBusy )
+            {
+                cts.Token.ThrowIfCancellationRequested();
+                Thread.Sleep( 100 );
+            }
             backgroundWorker.RunWorkerAsync( progressItem );
             await Task.FromResult( 0 );
+        }
+
+        public void UseBuildAgentToken( string token )
+        {
+            buildAgentToken = token;
         }
 
         private async void BackgroundWorkerOnDoWorkAsync( object sender, DoWorkEventArgs args )
@@ -35,32 +46,9 @@
                 return;
             }
 
+            dto.BuildAgentToken = buildAgentToken;
             await coreCiClient.Jobs.ReportAsync( dto );
-
-            switch ( dto.JobProgressType )
-            {
-                case JobProgressType.Command:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    break;
-                case JobProgressType.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    break;
-                case JobProgressType.Informational:
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    break;
-                case JobProgressType.Success:
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    break;
-                case JobProgressType.Warning:
-                    Console.ForegroundColor = ConsoleColor.Magenta;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            Console.WriteLine( dto.Message );
-            Console.ForegroundColor = originalSettings.foreground;
-            Console.BackgroundColor = originalSettings.background;
+            consoleReporter?.Report( dto );
         }
     }
 }

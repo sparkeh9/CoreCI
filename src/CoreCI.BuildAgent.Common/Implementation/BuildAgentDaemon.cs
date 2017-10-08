@@ -24,6 +24,7 @@
 
         private bool isRegistered;
 
+
         public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProgressReporter progressReporter, DockerBuildProcessor dockerBuildProcessor,
                                  NativeBuildProcessor nativeBuildProcessor )
         {
@@ -34,7 +35,14 @@
             this.dockerBuildProcessor = dockerBuildProcessor;
             this.nativeBuildProcessor = nativeBuildProcessor;
 
-            this.vcsAppropriator.OnProgress += ( sender, report ) => { progressReporter.ReportAsync( report ); };
+            this.vcsAppropriator.OnProgress += ( sender, report ) =>
+                                               {
+                                                   try
+                                                   {
+                                                       progressReporter.ReportAsync( report );
+                                                   }
+                                                   catch ( OperationCanceledException ) { }
+                                               };
             waitForeverPolicy = Policy.Handle<Exception>()
                                       .WaitAndRetryForeverAsync( Sleep, onRetry : async ( exception, span ) => { await OnRetryAsync( exception, span ); } );
         }
@@ -60,26 +68,28 @@
 
                 await progressReporter.ReportAsync( new JobProgressDto( "Checking for available jobs", JobProgressType.Command ) );
 
-                var job = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environment );
+                var reserveResult = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environment );
 
-                if ( !job.HasValue )
+                if ( !reserveResult.HasValue )
                 {
                     EnablePolling();
                     return;
                 }
 
+                progressReporter.UseBuildAgentToken( reserveResult.Value.reservation.BuildAgentToken );
+
                 string tempPath = GenerateTempPath();
 
                 await progressReporter.ReportAsync( new JobProgressDto
                 {
-                    Message = $"Reserved job {job.Value.job.JobId}",
+                    Message = $"Reserved job {reserveResult.Value.job.JobId}",
                     JobProgressType = JobProgressType.Informational
                 } );
 
-                await vcsAppropriator.AcquireAsync( job.Value.job, tempPath );
+                await vcsAppropriator.AcquireAsync( reserveResult.Value.job, tempPath );
                 var buildFile = buildFileParser.ParseBuildFile( tempPath );
                 InitialiseBuildProcessor( buildFile );
-                await buildProcessor.DoBuildAsync( job.Value.job, buildFile, tempPath );
+                await buildProcessor.DoBuildAsync( reserveResult.Value.job, buildFile, tempPath );
             }
             catch ( Exception e )
             {
