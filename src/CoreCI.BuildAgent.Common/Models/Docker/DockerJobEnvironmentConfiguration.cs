@@ -16,7 +16,7 @@
 
         public DockerJobEnvironmentConfiguration( JobDto job, BuildFile buildFile, string path )
         {
-            if ( buildFile.Environment == BuildEnvironment.Windows )
+            if ( buildFile.Environment == BuildEnvironmentOs.Windows )
             {
                 ScriptFileExtension = "ps1";
                 InsideContainerDirectory = @"c:\workspace";
@@ -35,7 +35,7 @@
                 NewLineCharacter = "\n";
             }
             
-            HostWorkspaceBuildFilePath = job.Environment == BuildEnvironment.Windows
+            HostWorkspaceBuildFilePath = job.Environment == BuildEnvironmentOs.Windows
                 ? $@"{path}\coreci_build_steps.{ScriptFileExtension}"
                 : $@"{path}/coreci_build_steps.{ScriptFileExtension}";
         }

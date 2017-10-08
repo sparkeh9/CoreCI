@@ -1,4 +1,4 @@
-﻿namespace CoreCI.BuildAgent.Common
+﻿namespace CoreCI.BuildAgent.Common.BuildAgentCore.Progress
 {
     using CoreCI.Common.Models.Jobs;
 

@@ -1,9 +1,8 @@
 ﻿namespace CoreCI.Common.Models
 {
-    public enum BuildEnvironment
+    public class BuildEnvironment
     {
-        Linux,
-        Mac,
-        Windows
+        public BuildEnvironmentOs BuildOs { get; set; }
+        public BuildMode BuildMode { get; set; }
     }
 }

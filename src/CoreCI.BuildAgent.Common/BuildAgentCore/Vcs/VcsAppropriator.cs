@@ -1,4 +1,4 @@
-﻿namespace CoreCI.BuildAgent.Common.Implementation
+﻿namespace CoreCI.BuildAgent.Common.BuildAgentCore.Vcs
 {
     using System;
     using System.IO;
@@ -24,7 +24,7 @@
                         throw new ArgumentOutOfRangeException( nameof( job.Data ) );
                     }
 
-                    AcquireGenericGit( job, gitVcsJob, path );
+                    AcquireGenericGit( gitVcsJob, path );
                     return;
                 case VcsType.BitBucketGit:
                     if ( !( job.Data is BitBucketGitVcsJob bitbucketGitVcsJob ) )
@@ -32,7 +32,7 @@
                         throw new ArgumentOutOfRangeException( nameof( job.Data ) );
                     }
 
-                    AcquireBitBucketGit( job, bitbucketGitVcsJob, path );
+                    AcquireBitBucketGit( bitbucketGitVcsJob, path );
                     break;
                 default:
                     throw new ArgumentOutOfRangeException( nameof( job.Data.VcsType ) );
@@ -41,7 +41,7 @@
             CleanDirectoryRecursively( new DirectoryInfo( path ) );
         }
 
-        private void AcquireGenericGit( JobDto jobDto, GitVcsJob jobData, string path )
+        private void AcquireGenericGit( GitVcsJob jobData, string path )
         {
             var lastUpdated = DateTime.Now.AddSeconds( -1 );
             var genericGitProvider = new GenericGitVcsProvider( jobData.BasicAuthenticationCredentials );
@@ -71,7 +71,7 @@
             progressBar = null;
         }
 
-        private void AcquireBitBucketGit( JobDto jobDto, BitBucketGitVcsJob jobData, string path )
+        private void AcquireBitBucketGit( BitBucketGitVcsJob jobData, string path )
         {
             progressBar = new ProgressBar( 100 );
             var bitbucketGitProvider = jobData.OAuth2Credentials != null

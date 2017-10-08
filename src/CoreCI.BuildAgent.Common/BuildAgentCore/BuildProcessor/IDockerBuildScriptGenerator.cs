@@ -1,4 +1,4 @@
-namespace CoreCI.BuildAgent.Common
+namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
 {
     using System.Threading.Tasks;
     using Models.BuildFile;

@@ -1,4 +1,4 @@
-namespace CoreCI.BuildAgent.Common.Implementation
+namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
 {
     using System;
     using System.Diagnostics;
@@ -19,10 +19,10 @@ namespace CoreCI.BuildAgent.Common.Implementation
             }
         }
 
-        private Task RunShellCommand( BuildEnvironment environment, string path, string command )
+        private Task RunShellCommand( BuildEnvironmentOs environment, string path, string command )
         {
             var tcs = new TaskCompletionSource<object>();
-            string shellPath = environment == BuildEnvironment.Windows
+            string shellPath = environment == BuildEnvironmentOs.Windows
                 ? "powershell.exe"
                 : "/bin/bash";
 

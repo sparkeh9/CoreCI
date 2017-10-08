@@ -6,7 +6,7 @@
 
     public class BuildFile
     {
-        public BuildEnvironment Environment { get; set; }
+        public BuildEnvironmentOs Environment { get; set; }
 
         [ YamlMember( Alias = "mode" ) ]
         public BuildMode BuildMode { get; set; }

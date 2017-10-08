@@ -18,11 +18,11 @@
             this.coreCiHttpClient = coreCiHttpClient;
         }
 
-        public async Task<IEnumerable<JobDto>> ListAvailableJobsAsync( BuildEnvironment environment )
+        public async Task<IEnumerable<JobDto>> ListAvailableJobsAsync( IEnumerable<BuildEnvironment> environments )
         {
             var endpointUrl = coreCiHttpClient.BaseApiUrl
                                               .AppendPathSegment( "jobs" )
-                                              .SetQueryParam( "environment", environment );
+                                              .SetQueryParams( GenerateEnvironments( environments ) );
             var response = await coreCiHttpClient.FetchPagedAsync<JobDto>( endpointUrl );
 
             return response;
@@ -38,18 +38,20 @@
             return response;
         }
 
-        public async Task<(JobDto job, JobReservedDto reservation)?> ReserveFirstAvailableJobAsync( BuildEnvironment environment )
+        public async Task<(JobDto job, JobReservedDto reservation)?> ReserveFirstAvailableJobAsync( IEnumerable<BuildEnvironment> environments )
         {
             var endpointUrl = coreCiHttpClient.BaseApiUrl
                                               .AppendPathSegment( "jobs" )
-                                              .SetQueryParam( "environment", environment );
+                                              .SetQueryParams( GenerateEnvironments( environments ) );
             var firstPage = await endpointUrl.Authenticate( coreCiHttpClient.Authenticator )
                                              .GetJsonAsync<PagedResponse<JobDto>>();
 
             var firstJob = firstPage.Values.FirstOrDefault();
 
             if ( firstJob == null )
+            {
                 return null;
+            }
 
             var reservation = await ReserveJobAsync( firstJob.JobId );
             var hydratedFirstJob = await FindByIdAsync( firstJob.JobId );
@@ -81,6 +83,7 @@
             return jobReservedDto;
         }
 
+
         public async Task ReportAsync( JobProgressDto jobProgress )
         {
             await Task.Delay( 0 );
@@ -90,6 +93,17 @@
 //                                                 .Authenticate( coreCiHttpClient.Authenticator )
 //                                                 .PostJsonAsync( jobProgress );
 //            response.EnsureSuccessStatusCode();
+        }
+
+        private IEnumerable<string> GenerateEnvironments( IEnumerable<BuildEnvironment> environments )
+        {
+            var i = 0;
+            foreach ( var environment in environments )
+            {
+                yield return $"Environments[{i}].BuildOs={environment.BuildOs}";
+                yield return $"Environments[{i}].BuildMode={environment.BuildMode}";
+                i++;
+            }
         }
     }
 }

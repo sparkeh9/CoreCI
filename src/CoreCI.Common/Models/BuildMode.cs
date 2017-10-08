@@ -1,4 +1,4 @@
-namespace CoreCI.BuildAgent.Common.Models.BuildFile
+﻿namespace CoreCI.Common.Models
 {
     public enum BuildMode
     {

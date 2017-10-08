@@ -1,4 +1,4 @@
-﻿namespace CoreCI.BuildAgent.Common.Implementation
+﻿namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildFile
 {
     using System.IO;
     using Exceptions;

@@ -74,10 +74,16 @@
         {
             var expression = PredicateBuilder.New<Job>();
 
-            if ( query.BuildEnvironment.HasValue )
+
+            if ( query.BuildEnvironments != null )
             {
-                expression = expression.And( PredicateBuilder.New<Job>()
-                                                             .Or( x => x.Environment == query.BuildEnvironment.Value ) );
+                foreach ( var environment in query.BuildEnvironments )
+                {
+                    expression = expression.And( PredicateBuilder.New<Job>()
+                                                                 .Or( x => x.Environment == environment.BuildOs )
+                                                                 .And( x => x.BuildMode == environment.BuildMode ) )
+                        ;
+                }
             }
 
             if ( query.JobStatus.HasValue )

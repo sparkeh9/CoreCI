@@ -1,32 +1,45 @@
-﻿namespace CoreCI.BuildAgent.Common.Implementation
+﻿namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
+    using BuildFile;
     using CoreCI.Common.Models;
     using CoreCI.Common.Models.Jobs;
+    using Docker.DotNet;
+    using Docker.DotNet.Models;
     using Models.BuildFile;
     using Polly;
     using Polly.Retry;
+    using Progress;
     using Sdk;
+    using Vcs;
 
     public class BuildAgentDaemon : IBuildAgentDaemon
     {
         private readonly IBuildFileParser buildFileParser;
-
         private readonly ICoreCI coreCiClient;
         private readonly DockerBuildProcessor dockerBuildProcessor;
+        private readonly DockerClient dockerClient;
         private readonly NativeBuildProcessor nativeBuildProcessor;
         private readonly IBuildProgressReporter progressReporter;
         private readonly IVcsAppropriator vcsAppropriator;
+
         private readonly RetryPolicy waitForeverPolicy;
         private IBuildProcessor buildProcessor;
+
+        private SystemInfoResponse dockerSystemInfoResponse;
+
+        private List<BuildEnvironment> environmentMatrix;
+//        private SystemInfoResponse dockerSystemInfo;
 
         private bool isRegistered;
 
 
-        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProgressReporter progressReporter, DockerBuildProcessor dockerBuildProcessor,
-                                 NativeBuildProcessor nativeBuildProcessor )
+        public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProgressReporter progressReporter, DockerBuildProcessor dockerBuildProcessor, NativeBuildProcessor nativeBuildProcessor,
+                                 DockerClient dockerClient )
         {
             this.coreCiClient = coreCiClient;
             this.vcsAppropriator = vcsAppropriator;
@@ -34,6 +47,7 @@
             this.progressReporter = progressReporter;
             this.dockerBuildProcessor = dockerBuildProcessor;
             this.nativeBuildProcessor = nativeBuildProcessor;
+            this.dockerClient = dockerClient;
 
             this.vcsAppropriator.OnProgress += ( sender, report ) =>
                                                {
@@ -49,26 +63,16 @@
 
         public event EventHandler<bool> PollStatusChanged;
 
-        public async Task InvokeAsync( BuildEnvironment environment )
+        public async Task InvokeAsync( BuildEnvironmentOs environment )
         {
             try
             {
                 DisablePolling();
-
-                if ( !isRegistered )
-                {
-                    await waitForeverPolicy.ExecuteAsync( async () =>
-                                                          {
-                                                              await progressReporter.ReportAsync( new JobProgressDto( "Attempting to register build agent with coordinator" ) );
-                                                              await coreCiClient.Agents.RegisterAsync( environment );
-                                                              await progressReporter.ReportAsync( new JobProgressDto( "Registered with coordinator" ) );
-                                                              isRegistered = true;
-                                                          } );
-                }
-
+                await DetermineBuildEnvironmentMatrix( environment );
+                await RegisterWithCoordinator( environmentMatrix );
                 await progressReporter.ReportAsync( new JobProgressDto( "Checking for available jobs", JobProgressType.Command ) );
 
-                var reserveResult = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environment );
+                var reserveResult = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync(environmentMatrix);
 
                 if ( !reserveResult.HasValue )
                 {
@@ -125,6 +129,57 @@
             catch ( Exception e )
             {
                 Console.WriteLine( e.Message );
+            }
+        }
+
+        private async Task RegisterWithCoordinator( List<BuildEnvironment> environments )
+        {
+            if ( !isRegistered )
+            {
+                await waitForeverPolicy.ExecuteAsync( async () =>
+                                                      {
+                                                          await progressReporter.ReportAsync( new JobProgressDto( "Attempting to register build agent with coordinator" ) );
+                                                          await coreCiClient.Agents.RegisterAsync( environments );
+                                                          await progressReporter.ReportAsync( new JobProgressDto( "Registered with coordinator" ) );
+                                                          isRegistered = true;
+                                                      } );
+            }
+        }
+
+        private async Task DetermineBuildEnvironmentMatrix( BuildEnvironmentOs nativeOs )
+        {
+            if ( environmentMatrix == null )
+            {
+                try
+                {
+                    var cts = new CancellationTokenSource();
+                    cts.CancelAfter( TimeSpan.FromSeconds( 10 ) );
+                    dockerSystemInfoResponse = await dockerClient.System.GetSystemInfoAsync( cts.Token );
+                }
+                catch ( Exception )
+                {
+                    // ignored
+                }
+
+                environmentMatrix = new List<BuildEnvironment>
+                {
+                    new BuildEnvironment
+                    {
+                        BuildOs = nativeOs,
+                        BuildMode = BuildMode.Native
+                    }
+                };
+
+                if ( dockerSystemInfoResponse != null )
+                {
+                    environmentMatrix.Add( new BuildEnvironment
+                    {
+                        BuildMode = BuildMode.Docker,
+                        BuildOs = dockerSystemInfoResponse.OSType == "linux"
+                            ? BuildEnvironmentOs.Linux
+                            : BuildEnvironmentOs.Windows
+                    } );
+                }
             }
         }
 

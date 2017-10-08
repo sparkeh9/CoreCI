@@ -2,7 +2,7 @@
 {
     using System;
     using System.Timers;
-    using Common;
+    using Common.BuildAgentCore.BuildProcessor;
     using Topshelf;
     using CoreCI.Common.Models;
 
@@ -24,7 +24,7 @@
             timer.Elapsed += async ( sender, args ) =>
                              {
                                  timer.Interval = TimeSpan.FromSeconds( 30 ).TotalMilliseconds;
-                                 await buildAgentDaemon.InvokeAsync( BuildEnvironment.Windows );
+                                 await buildAgentDaemon.InvokeAsync( BuildEnvironmentOs.Windows );
                              };
             timer.Start();
             return true;

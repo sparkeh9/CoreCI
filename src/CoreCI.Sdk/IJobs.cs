@@ -8,8 +8,8 @@
 
     public interface IJobs
     {
-        Task<IEnumerable<JobDto>> ListAvailableJobsAsync( BuildEnvironment environment );
-        Task<(JobDto job, JobReservedDto reservation)?> ReserveFirstAvailableJobAsync( BuildEnvironment environment );
+        Task<IEnumerable<JobDto>> ListAvailableJobsAsync( IEnumerable<BuildEnvironment> environments );
+        Task<(JobDto job, JobReservedDto reservation)?> ReserveFirstAvailableJobAsync( IEnumerable<BuildEnvironment> environments );
         Task<JobDto> GetJobDetailsAsync( ObjectId jobIdt );
         Task<JobReservedDto> ReserveJobAsync( ObjectId jobId );
         Task<JobDto> FindByIdAsync( ObjectId jobId );

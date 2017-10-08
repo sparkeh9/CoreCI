@@ -1,5 +1,6 @@
 ﻿namespace CoreCI.Sdk.Implementation.Http
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Common.Models;
     using Common.Models.Agents;
@@ -15,7 +16,7 @@
             this.coreCiHttpClient = coreCiHttpClient;
         }
 
-        public async Task RegisterAsync( BuildEnvironment environment )
+        public async Task RegisterAsync( List<BuildEnvironment> environment )
         {
             var response = await coreCiHttpClient.BaseApiUrl
                                                  .AppendPathSegment( "agents" )
@@ -23,7 +24,7 @@
                                                  .Authenticate( coreCiHttpClient.Authenticator )
                                                  .PostJsonAsync( new RegisterAgentDto
                                                  {
-                                                     BuildEnvironment = environment
+                                                     BuildEnvironments = environment
                                                  } );
 
             response.EnsureSuccessStatusCode();

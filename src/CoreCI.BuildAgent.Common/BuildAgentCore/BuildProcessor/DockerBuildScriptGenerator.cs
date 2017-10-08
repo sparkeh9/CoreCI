@@ -1,4 +1,4 @@
-﻿namespace CoreCI.BuildAgent.Common.Implementation
+﻿namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
 {
     using System.Collections.Generic;
     using System.IO;
@@ -14,7 +14,7 @@
             using ( TextWriter tw = File.CreateText( dockerEnvironmentConfig.HostWorkspaceBuildFilePath ) )
             {
                 tw.NewLine = dockerEnvironmentConfig.NewLineCharacter;
-                if ( buildFile.Environment == BuildEnvironment.Windows )
+                if ( buildFile.Environment == BuildEnvironmentOs.Windows )
                 {
                     await tw.WriteLineAsync( @"cd c:\workspace" );
                 }
@@ -31,7 +31,7 @@
             }
         }
 
-        private IEnumerable<string> GenerateCommands( IEnumerable<string> input )
+        private static IEnumerable<string> GenerateCommands( IEnumerable<string> input )
         {
             foreach ( string command in input )
             {

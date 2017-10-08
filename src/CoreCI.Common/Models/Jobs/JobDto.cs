@@ -10,7 +10,8 @@
         [ JsonConverter( typeof( MongoObjectIdConverter ) ) ]
         public ObjectId JobId { get; set; }
 
-        public BuildEnvironment Environment { get; set; }
+        public BuildEnvironmentOs Environment { get; set; }
+        public BuildMode BuildMode { get; set; }
         public Dictionary<string, Link> Links { get; set; }
 
         [ JsonConverter( typeof( VcsJobConverter ) ) ]

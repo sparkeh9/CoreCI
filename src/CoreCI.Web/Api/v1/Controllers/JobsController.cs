@@ -33,11 +33,11 @@
         /// </summary>
         /// <returns></returns>
         [ HttpGet ]
-        public async Task<IActionResult> Index( GetJobsRequest request )
+        public async Task<IActionResult> Index( [ FromQuery ] GetJobsRequest request )
         {
             var results = await jobRepository.ListByAsync( new JobQuery
             {
-                BuildEnvironment = request.Environment,
+                BuildEnvironments = request.Environments,
                 Page = request.Page,
                 JobStatus = request.JobStatus
             } );
@@ -72,7 +72,9 @@
             var job = await jobRepository.FindByIdAsync( objectId );
 
             if ( job == null )
+            {
                 return NotFound();
+            }
 
             return Json( new JobDto
             {

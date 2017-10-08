@@ -1,11 +1,19 @@
 ﻿namespace CoreCI.BuildAgent.Windows.Infrastructure.Modules
 {
+    using System;
     using System.Configuration;
+    using System.Security.Cryptography.X509Certificates;
     using Autofac;
-    using Common;
-    using Common.Implementation;
+    using Common.BuildAgentCore.BuildFile;
+    using Common.BuildAgentCore.BuildProcessor;
+    using Common.BuildAgentCore.Progress;
+    using Common.BuildAgentCore.Vcs;
     using Common.Models;
     using Common.Models.Docker;
+    using CoreCI.Common.Extensions;
+    using Docker.DotNet;
+    using Docker.DotNet.BasicAuth;
+    using Docker.DotNet.X509;
     using Sdk;
     using Sdk.Implementation.Http;
     using Sdk.Implementation.Http.Authentication;
@@ -29,19 +37,7 @@
                                   };
                               } ).As<ApiCredentials>();
 
-            builder.Register( ctx =>
-                              {
-                                  var config = ctx.Resolve<Configuration>();
-                                  var dockerHost = config.AppSettings.Settings[ "dockerHost" ];
-                                  var certificatePath = config.AppSettings.Settings[ "dockerCertificatePath" ];
-
-                                  return new DockerConfiguration
-                                  {
-                                      RemoteEndpoint = dockerHost?.Value,
-                                      CertificatePath = certificatePath?.Value
-                                  };
-                              } ).As<DockerConfiguration>();
-
+            RegisterDocker( builder );
 
             builder.Register( ctx =>
                               {
@@ -71,6 +67,64 @@
 #else
             builder.RegisterType<NullConsoleReporter>().As<IConsoleProgressReporter>();
 #endif
+        }
+
+        private static void RegisterDocker( ContainerBuilder builder )
+        {
+            builder.Register( ctx =>
+                              {
+                                  var config = ctx.Resolve<Configuration>();
+                                  var dockerHost = config.AppSettings.Settings[ "dockerHost" ];
+                                  var certificatePath = config.AppSettings.Settings[ "dockerCertificatePath" ];
+
+                                  return new DockerConfiguration
+                                  {
+                                      RemoteEndpoint = dockerHost?.Value,
+                                      CertificatePath = certificatePath?.Value
+                                  };
+                              } ).As<DockerConfiguration>();
+
+            builder.Register<Credentials>( ctx =>
+                                           {
+                                               var dockerConfiguration = ctx.Resolve<DockerConfiguration>();
+                                               var uri = new Uri( dockerConfiguration.RemoteEndpoint );
+
+                                               if ( uri.Scheme == "npipe" || uri.Scheme == "unix" )
+                                               {
+                                                   return new AnonymousCredentials();
+                                               }
+
+                                               if ( !dockerConfiguration.PfxPath.IsNullOrWhiteSpace() )
+                                               {
+                                                   return dockerConfiguration.PfxPassword.IsNullOrEmpty()
+                                                       ? new CertificateCredentials( new X509Certificate2( dockerConfiguration.PfxPath ) )
+                                                       : new CertificateCredentials( new X509Certificate2( dockerConfiguration.PfxPath, dockerConfiguration.PfxPassword ) );
+                                               }
+
+                                               if ( dockerConfiguration.PfxBytes != null && dockerConfiguration.PfxBytes.Length > 0 )
+                                               {
+                                                   return dockerConfiguration.PfxPassword.IsNullOrEmpty()
+                                                       ? new CertificateCredentials( new X509Certificate2( dockerConfiguration.PfxBytes ) )
+                                                       : new CertificateCredentials( new X509Certificate2( dockerConfiguration.PfxBytes, dockerConfiguration.PfxPassword ) );
+                                               }
+
+                                               if ( dockerConfiguration.BasicAuth != null &&
+                                                    !dockerConfiguration.BasicAuth.Username.IsNullOrWhiteSpace() &&
+                                                    !dockerConfiguration.BasicAuth.Password.IsNullOrWhiteSpace() )
+                                               {
+                                                   return new BasicAuthCredentials( dockerConfiguration.BasicAuth.Username, dockerConfiguration.BasicAuth.Password, dockerConfiguration.BasicAuth.Tls );
+                                               }
+
+                                               return new AnonymousCredentials();
+                                           } ).As<Credentials>();
+
+            builder.Register( ctx =>
+                              {
+                                  var dockerConfiguration = ctx.Resolve<DockerConfiguration>();
+                                  var credentials = ctx.Resolve<Credentials>();
+                                  var config = new DockerClientConfiguration( new Uri( dockerConfiguration.RemoteEndpoint ), credentials );
+                                  return config.CreateClient();
+                              } ).As<DockerClient>();
         }
     }
 }

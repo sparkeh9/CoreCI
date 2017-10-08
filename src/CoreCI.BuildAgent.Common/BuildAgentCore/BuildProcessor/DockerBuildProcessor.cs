@@ -1,43 +1,37 @@
-namespace CoreCI.BuildAgent.Common.Implementation
+namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
 {
     using System;
     using System.Collections.Generic;
-    using System.Security.Cryptography.X509Certificates;
+    using System.Linq;
     using System.Threading.Tasks;
     using CoreCI.Common.Extensions;
     using CoreCI.Common.Models.Jobs;
     using Docker.DotNet;
-    using Docker.DotNet.BasicAuth;
     using Docker.DotNet.Models;
-    using Docker.DotNet.X509;
     using Extentions;
     using Konsole;
     using Models.BuildFile;
     using Models.Docker;
-    using System.Linq;
 
     public class DockerBuildProcessor : IBuildProcessor
     {
         private readonly DockerClient dockerClient;
         private readonly DockerConfiguration dockerConfiguration;
-        private readonly IDockerBuildScriptGenerator scriptGenerator;
         private readonly Dictionary<string, ProgressBar> progressBars = new Dictionary<string, ProgressBar>();
+        private readonly IDockerBuildScriptGenerator scriptGenerator;
 
-        public DockerBuildProcessor( DockerConfiguration dockerConfiguration, IDockerBuildScriptGenerator scriptGenerator )
+        public DockerBuildProcessor( DockerConfiguration dockerConfiguration, IDockerBuildScriptGenerator scriptGenerator, DockerClient dockerClient )
         {
             this.dockerConfiguration = dockerConfiguration;
             this.scriptGenerator = scriptGenerator;
-
-            var credentials = GetDockerRemoteApiCredentials();
-            var config = new DockerClientConfiguration( new Uri( dockerConfiguration.RemoteEndpoint ), credentials );
-            dockerClient = config.CreateClient();
+            this.dockerClient = dockerClient;
         }
 
         public event EventHandler<JobProgressDto> OnProgress;
 
         public async Task DoBuildAsync( JobDto job, BuildFile buildFile, string path )
         {
-            var dockerEnvironmentConfig = new DockerJobEnvironmentConfiguration(job, buildFile, path );
+            var dockerEnvironmentConfig = new DockerJobEnvironmentConfiguration( job, buildFile, path );
             await scriptGenerator.GenerateBuildScript( buildFile, dockerEnvironmentConfig );
             await PullMessageIfNecessaryAsync( buildFile );
             var container = await CreateContainerAsync( buildFile, dockerEnvironmentConfig );
@@ -157,39 +151,6 @@ namespace CoreCI.BuildAgent.Common.Implementation
             progressBar.Refresh( current, $"{message.ID}: {message.Status}" );
 
             progressBars[ message.ID ] = progressBar;
-        }
-
-        private Credentials GetDockerRemoteApiCredentials()
-        {
-            var uri = new Uri( dockerConfiguration.RemoteEndpoint );
-
-            if ( uri.Scheme == "npipe" || uri.Scheme == "unix" )
-            {
-                return new AnonymousCredentials();
-            }
-
-            if ( !dockerConfiguration.PfxPath.IsNullOrWhiteSpace() )
-            {
-                return dockerConfiguration.PfxPassword.IsNullOrEmpty()
-                    ? new CertificateCredentials( new X509Certificate2( dockerConfiguration.PfxPath ) )
-                    : new CertificateCredentials( new X509Certificate2( dockerConfiguration.PfxPath, dockerConfiguration.PfxPassword ) );
-            }
-
-            if ( dockerConfiguration.PfxBytes != null && dockerConfiguration.PfxBytes.Length > 0 )
-            {
-                return dockerConfiguration.PfxPassword.IsNullOrEmpty()
-                    ? new CertificateCredentials( new X509Certificate2( dockerConfiguration.PfxBytes ) )
-                    : new CertificateCredentials( new X509Certificate2( dockerConfiguration.PfxBytes, dockerConfiguration.PfxPassword ) );
-            }
-
-            if ( dockerConfiguration.BasicAuth != null &&
-                 !dockerConfiguration.BasicAuth.Username.IsNullOrWhiteSpace() &&
-                 !dockerConfiguration.BasicAuth.Password.IsNullOrWhiteSpace() )
-            {
-                return new BasicAuthCredentials( dockerConfiguration.BasicAuth.Username, dockerConfiguration.BasicAuth.Password, dockerConfiguration.BasicAuth.Tls );
-            }
-
-            return new AnonymousCredentials();
         }
 
         private async Task StreamTty( MultiplexedStream multiplexedStream )

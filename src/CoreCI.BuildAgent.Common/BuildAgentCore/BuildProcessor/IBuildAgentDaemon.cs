@@ -1,4 +1,4 @@
-﻿namespace CoreCI.BuildAgent.Common
+﻿namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
 {
     using System;
     using System.Threading.Tasks;
@@ -6,7 +6,7 @@
 
     public interface IBuildAgentDaemon
     {
-        Task InvokeAsync( BuildEnvironment environment );
+        Task InvokeAsync( BuildEnvironmentOs environment );
         Task StopAsync();
         event EventHandler<bool> PollStatusChanged;
     }

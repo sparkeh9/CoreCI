@@ -1,7 +1,9 @@
 ﻿namespace CoreCI.Common.Models.Agents
 {
-   public class RegisterAgentDto
-   {
-      public BuildEnvironment BuildEnvironment { get; set; }
-   }
+    using System.Collections.Generic;
+
+    public class RegisterAgentDto
+    {
+        public List<BuildEnvironment> BuildEnvironments { get; set; }
+    }
 }
