@@ -79,10 +79,9 @@
             {
                 foreach ( var environment in query.BuildEnvironments )
                 {
-                    expression = expression.And( PredicateBuilder.New<Job>()
-                                                                 .Or( x => x.Environment == environment.BuildOs )
-                                                                 .And( x => x.BuildMode == environment.BuildMode ) )
-                        ;
+                    expression = expression.Or( PredicateBuilder.New<Job>()
+                                                                .And( x => x.Environment == environment.BuildOs )
+                                                                .And( x => x.BuildMode == environment.BuildMode ) );
                 }
             }
 

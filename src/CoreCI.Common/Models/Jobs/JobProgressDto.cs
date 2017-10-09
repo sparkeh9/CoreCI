@@ -12,10 +12,11 @@
 
         public JobProgressDto() { }
 
-        public JobProgressDto( string message, JobProgressType jobProgressType = JobProgressType.Informational )
+        public JobProgressDto( string message, JobProgressType jobProgressType = JobProgressType.Informational, bool recorded = true )
         {
             Message = message;
             JobProgressType = jobProgressType;
+            Recorded = recorded;
         }
     }
 }

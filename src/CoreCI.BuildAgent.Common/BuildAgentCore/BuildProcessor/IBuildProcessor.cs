@@ -7,7 +7,7 @@
 
     public interface IBuildProcessor
     {
-        Task DoBuildAsync( JobDto job, BuildFile buildFile, string path );
+        Task<JobCompletionResult> DoBuildAsync( JobDto job, BuildFile buildFile, string path );
         event EventHandler<JobProgressDto> OnProgress;
     }
 }

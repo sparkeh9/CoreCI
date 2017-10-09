@@ -86,13 +86,12 @@
 
         public async Task ReportAsync( JobProgressDto jobProgress )
         {
-            await Task.Delay( 0 );
-//            var response = await coreCiHttpClient.BaseApiUrl
-//                                                 .AppendPathSegment( "jobs" )
-//                                                 .AppendPathSegment( "reserve" )
-//                                                 .Authenticate( coreCiHttpClient.Authenticator )
-//                                                 .PostJsonAsync( jobProgress );
-//            response.EnsureSuccessStatusCode();
+            var response = await coreCiHttpClient.BaseApiUrl
+                                                 .AppendPathSegment( "jobs" )
+                                                 .AppendPathSegment( "report" )
+                                                 .Authenticate( coreCiHttpClient.Authenticator )
+                                                 .PostJsonAsync( jobProgress );
+            response.EnsureSuccessStatusCode();
         }
 
         private IEnumerable<string> GenerateEnvironments( IEnumerable<BuildEnvironment> environments )
@@ -100,8 +99,8 @@
             var i = 0;
             foreach ( var environment in environments )
             {
-                yield return $"Environments[{i}].BuildOs={environment.BuildOs}";
-                yield return $"Environments[{i}].BuildMode={environment.BuildMode}";
+                yield return $"Environments[{i}].{nameof(BuildEnvironment.BuildOs)}={environment.BuildOs}";
+                yield return $"Environments[{i}].{nameof(BuildEnvironment.BuildMode)}={environment.BuildMode}";
                 i++;
             }
         }

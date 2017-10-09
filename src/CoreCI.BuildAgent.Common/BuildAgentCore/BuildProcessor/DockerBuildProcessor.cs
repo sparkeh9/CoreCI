@@ -16,20 +16,18 @@ namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
     public class DockerBuildProcessor : IBuildProcessor
     {
         private readonly DockerClient dockerClient;
-        private readonly DockerConfiguration dockerConfiguration;
         private readonly Dictionary<string, ProgressBar> progressBars = new Dictionary<string, ProgressBar>();
         private readonly IDockerBuildScriptGenerator scriptGenerator;
 
-        public DockerBuildProcessor( DockerConfiguration dockerConfiguration, IDockerBuildScriptGenerator scriptGenerator, DockerClient dockerClient )
+        public DockerBuildProcessor( DockerClient dockerClient, IDockerBuildScriptGenerator scriptGenerator )
         {
-            this.dockerConfiguration = dockerConfiguration;
             this.scriptGenerator = scriptGenerator;
             this.dockerClient = dockerClient;
         }
 
         public event EventHandler<JobProgressDto> OnProgress;
 
-        public async Task DoBuildAsync( JobDto job, BuildFile buildFile, string path )
+        public async Task<JobCompletionResult> DoBuildAsync( JobDto job, BuildFile buildFile, string path )
         {
             var dockerEnvironmentConfig = new DockerJobEnvironmentConfiguration( job, buildFile, path );
             await scriptGenerator.GenerateBuildScript( buildFile, dockerEnvironmentConfig );
@@ -43,6 +41,12 @@ namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
                 JobProgressType = JobProgressType.Success,
                 Message = "Build completed"
             } );
+
+
+            return new JobCompletionResult
+            {
+                Successful = true
+            };
         }
 
         private async Task StartContainerAndListenAsync( CreateContainerResponse container )

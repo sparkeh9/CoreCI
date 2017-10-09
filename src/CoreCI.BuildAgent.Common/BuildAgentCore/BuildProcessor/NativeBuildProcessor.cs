@@ -11,12 +11,18 @@ namespace CoreCI.BuildAgent.Common.BuildAgentCore.BuildProcessor
     {
         public event EventHandler<JobProgressDto> OnProgress;
 
-        public async Task DoBuildAsync( JobDto job, BuildFile buildFile, string path )
+        public async Task<JobCompletionResult> DoBuildAsync( JobDto job, BuildFile buildFile, string path )
         {
             foreach ( string command in buildFile.Commands )
             {
                 await RunShellCommand( job.Environment, path, command );
             }
+
+
+            return new JobCompletionResult
+            {
+                Successful = true
+            };
         }
 
         private Task RunShellCommand( BuildEnvironmentOs environment, string path, string command )

@@ -31,7 +31,6 @@
         /// <summary>
         ///     Lists jobs up for grabs
         /// </summary>
-        /// <returns></returns>
         [ HttpGet ]
         public async Task<IActionResult> Index( [ FromQuery ] GetJobsRequest request )
         {
@@ -50,6 +49,7 @@
                 Values = results.Select( x => new JobDto
                 {
                     Environment = x.Environment,
+                    BuildMode = x.BuildMode,
                     JobId = x.Id,
                     Links = new Dictionary<string, Link>
                     {

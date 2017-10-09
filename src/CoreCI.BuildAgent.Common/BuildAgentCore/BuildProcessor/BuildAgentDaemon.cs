@@ -26,17 +26,13 @@
         private readonly NativeBuildProcessor nativeBuildProcessor;
         private readonly IBuildProgressReporter progressReporter;
         private readonly IVcsAppropriator vcsAppropriator;
-
         private readonly RetryPolicy waitForeverPolicy;
         private IBuildProcessor buildProcessor;
 
         private SystemInfoResponse dockerSystemInfoResponse;
-
         private List<BuildEnvironment> environmentMatrix;
-//        private SystemInfoResponse dockerSystemInfo;
 
         private bool isRegistered;
-
 
         public BuildAgentDaemon( ICoreCI coreCiClient, IVcsAppropriator vcsAppropriator, IBuildFileParser buildFileParser, IBuildProgressReporter progressReporter, DockerBuildProcessor dockerBuildProcessor, NativeBuildProcessor nativeBuildProcessor,
                                  DockerClient dockerClient )
@@ -72,7 +68,7 @@
                 await RegisterWithCoordinator( environmentMatrix );
                 await progressReporter.ReportAsync( new JobProgressDto( "Checking for available jobs", JobProgressType.Command ) );
 
-                var reserveResult = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync(environmentMatrix);
+                var reserveResult = await coreCiClient.Jobs.ReserveFirstAvailableJobAsync( environmentMatrix );
 
                 if ( !reserveResult.HasValue )
                 {
@@ -94,6 +90,8 @@
                 var buildFile = buildFileParser.ParseBuildFile( tempPath );
                 InitialiseBuildProcessor( buildFile );
                 await buildProcessor.DoBuildAsync( reserveResult.Value.job, buildFile, tempPath );
+
+
             }
             catch ( Exception e )
             {
@@ -138,9 +136,9 @@
             {
                 await waitForeverPolicy.ExecuteAsync( async () =>
                                                       {
-                                                          await progressReporter.ReportAsync( new JobProgressDto( "Attempting to register build agent with coordinator" ) );
+                                                          await progressReporter.ReportAsync( new JobProgressDto( "Attempting to register build agent with coordinator", JobProgressType.Informational, false ) );
                                                           await coreCiClient.Agents.RegisterAsync( environments );
-                                                          await progressReporter.ReportAsync( new JobProgressDto( "Registered with coordinator" ) );
+                                                          await progressReporter.ReportAsync( new JobProgressDto( "Registered with coordinator", JobProgressType.Informational, false ) );
                                                           isRegistered = true;
                                                       } );
             }
