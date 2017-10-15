@@ -13,6 +13,7 @@
     using Infrastructure.Swagger;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.ApiExplorer;
+    using Microsoft.AspNetCore.SpaServices.Webpack;
     using Microsoft.Extensions.PlatformAbstractions;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
@@ -87,6 +88,11 @@
             {
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
+                app.UseWebpackDevMiddleware( new WebpackDevMiddlewareOptions
+                {
+                    HotModuleReplacement = true,
+                    ConfigFile = "webpack.dev.config.js"
+                } );
             }
             else
             {
@@ -98,6 +104,8 @@
                         {
                             routes.MapRoute( name : "default",
                                              template : "{controller=Home}/{action=Index}/{id?}" );
+
+                            routes.MapSpaFallbackRoute("spa-fallback", new { controller = "Home", action = "Index" });
                         } );
 
             app.UseSwagger();

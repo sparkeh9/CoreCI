@@ -1,43 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netcoreapp2.0\CoreCI.Web.xml</DocumentationFile>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <LangVersion>7.1</LangVersion>
-    <NoWarn>1701;1702;1705;1591</NoWarn>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DocumentationFile>bin\Debug\netcoreapp2.0\CoreCI.Web.xml</DocumentationFile>
+        <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+        <LangVersion>7.1</LangVersion>
+        <NoWarn>1701;1702;1705;1591</NoWarn>
+        <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 
-  <ItemGroup>
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
-    <PackageReference Include="LINQKit.Core" Version="1.1.9" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="2.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0" />
-  </ItemGroup>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
+        <PackageReference Include="LINQKit.Core" Version="1.1.9" />
+        <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="2.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.NodeServices" Version="2.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="2.0.0" />
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
+        <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Api\v1\Models\" />
-    <Folder Include="Controllers\" />
-    <Folder Include="Models\" />
-    <Folder Include="Views\Shared\" />
-    <Folder Include="wwwroot\css\" />
-    <Folder Include="wwwroot\images\" />
-    <Folder Include="wwwroot\js\" />
-  </ItemGroup>
+    <ItemGroup>
+        <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CoreCI.Common\CoreCI.Common.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Api\v1\Models\" />
+        <Folder Include="App\sass\" />
+        <Folder Include="Controllers\" />
+        <Folder Include="Models\" />
+        <Folder Include="Views\Shared\" />
+        <Folder Include="wwwroot\dist\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\CoreCI.Common\CoreCI.Common.csproj" />
+    </ItemGroup>
 
 </Project>

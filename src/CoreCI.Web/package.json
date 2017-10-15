@@ -1,0 +1,28 @@
+{
+    "version": "1.0.0",
+    "name": "coreci",
+    "license": "MIT",
+    "dependencies": {
+        "aurelia-bootstrapper": "^2.1.1",
+        "aurelia-computed": "^1.0.0",
+        "aurelia-validation": "^1.1.2"
+    },
+    "devDependencies": {
+        "@types/node": "^8.0.34",
+        "aspnet-webpack": "^2.0.1",
+        "aurelia-loader-webpack": "^2.1.0",
+        "aurelia-webpack-plugin": "^2.0.0-rc.5",
+        "css-loader": "^0.28.7",
+        "extract-text-webpack-plugin": "^3.0.1",
+        "node-sass": "^4.5.3",
+        "sass-loader": "^6.0.6",
+        "style-loader": "^0.19.0",
+        "ts-loader": "^2.3.7",
+        "typescript": "^2.5.3",
+        "webpack": "^3.7.1",
+        "webpack-extraneous-file-cleanup-plugin": "^1.0.3",
+        "webpack-hot-middleware": "^2.19.1",
+        "webpack-merge": "^4.1.0",
+        "webpack-module-hot-accept": "^1.0.5"
+    }
+}

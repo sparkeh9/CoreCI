@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1A853FB2-4679-48BE-9064-30D0EA0BF1D8}"
 	ProjectSection(SolutionItems) = preProject
@@ -24,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCI.Common", "src\CoreCI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCI.BuildAgent.Windows", "src\CoreCI.BuildAgent.Windows\CoreCI.BuildAgent.Windows.csproj", "{EF0BFBE3-1D10-44D2-85F3-F0A7D9C95E4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCI.BuildAgent.Common", "src\CoreCI.BuildAgent.Common\CoreCI.BuildAgent.Common.csproj", "{6BD154D6-F1EA-4059-B27A-B2A90911B781}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCI.BuildAgent.Common", "src\CoreCI.BuildAgent.Common\CoreCI.BuildAgent.Common.csproj", "{6BD154D6-F1EA-4059-B27A-B2A90911B781}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
