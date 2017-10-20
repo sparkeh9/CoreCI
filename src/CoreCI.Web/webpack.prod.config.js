@@ -1,6 +1,8 @@
-﻿const merge = require('webpack-merge');
+﻿const webpack = require('webpack');
+const merge = require('webpack-merge');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const OptimizeCssAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const baseConfig = require( './webpack.config.js' );
 
 module.exports = merge(baseConfig, {
@@ -19,6 +21,13 @@ module.exports = merge(baseConfig, {
         new ExtractTextPlugin( {
             filename: '[name].css',
             allChunks: true
+        }),
+        new UglifyJSPlugin( {
+            sourceMap: true
+        }), 
+        new OptimizeCssAssetsPlugin({
+            assetNameRegExp: /\.css$/,
+            cssProcessorOptions: { discardComments: { removeAll: true } }
         })
     ]
 } );
