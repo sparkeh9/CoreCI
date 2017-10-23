@@ -1,5 +1,5 @@
-﻿const webpack = require('webpack');
-const path = require('path');
+﻿const webpack = require( 'webpack' );
+const path = require( 'path' );
 const { AureliaPlugin } = require( 'aurelia-webpack-plugin' );
 
 module.exports = {
@@ -16,7 +16,21 @@ module.exports = {
     module: {
         rules: [
             { test: /\.html$/i, loaders: 'html-loader' },
-            { test: /\.ts$/i, loaders: 'ts-loader' }
+            { test: /\.ts$/i, loaders: 'ts-loader' },
+            { test: /\.svg$/, use: [ { loader: 'url-loader', options: { limit: 0, name: '[name].[ext]' } } ] },
+            {
+                test: /\.(eot|woff|woff2|ttf|png|jpe?g|gif)$/,
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options:
+                        {
+                            limit: 8192,
+                            name: '[name].[ext]'
+                        }
+                    }
+                ]
+            },
         ]
     },
     resolve: {
@@ -25,22 +39,25 @@ module.exports = {
     },
     devtool: 'sourcemap',
     plugins: [
-        new webpack.optimize.CommonsChunkPlugin({
+        new webpack.optimize.CommonsChunkPlugin( {
             name: 'vendor',
-            minChunks: function (module) {
-                return isExternal(module);
+            minChunks: function ( module )
+            {
+                return isExternal( module );
             }
-        }),
-        new AureliaPlugin(),
+        } ),
+        new AureliaPlugin()
     ]
 }
 
-function isExternal(module) {
+function isExternal( module )
+{
     var context = module.context;
 
-    if (typeof context !== 'string') {
+    if( typeof context !== 'string' )
+    {
         return false;
     }
 
-    return context.indexOf('node_modules') !== -1;
+    return context.indexOf( 'node_modules' ) !== -1;
 }

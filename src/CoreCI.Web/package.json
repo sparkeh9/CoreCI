@@ -2,33 +2,41 @@
     "version": "1.0.0",
     "name": "coreci",
     "license": "MIT",
-    "dependencies": {
-        "aurelia-bootstrapper": "^2.1.1",
-        "aurelia-computed": "^1.0.0",
-        "aurelia-validation": "^1.1.2",
-        "gulp-delete-file": "^1.0.2"
-    },
     "devDependencies": {
         "@types/node": "^8.0.34",
         "aspnet-webpack": "^2.0.1",
+        "aurelia-bootstrapper": "^2.1.1",
+        "aurelia-computed": "^1.0.0",
         "aurelia-loader-webpack": "^2.1.0",
+        "aurelia-validation": "^1.1.2",
         "aurelia-webpack-plugin": "^2.0.0-rc.5",
         "css-loader": "^0.28.7",
         "extract-text-webpack-plugin": "^3.0.1",
+        "file-loader": "^1.1.5",
         "gulp": "^3.9.1",
+        "gulp-delete-file": "^1.0.2",
         "gulp-filter": "^5.0.1",
         "node-sass": "^4.5.3",
         "optimize-css-assets-webpack-plugin": "^3.2.0",
         "sass-loader": "^6.0.6",
+        "simple-line-icons": "^2.4.1",
         "style-loader": "^0.19.0",
         "ts-loader": "^2.3.7",
+        "tslib": "^1.8.0",
         "typescript": "^2.5.3",
         "uglifyjs-webpack-plugin": "^1.0.0-beta.3",
+        "url-loader": "^0.6.2",
         "webpack": "^3.7.1",
         "webpack-extraneous-file-cleanup-plugin": "^1.0.3",
         "webpack-hot-middleware": "^2.19.1",
         "webpack-merge": "^4.1.0",
         "webpack-module-hot-accept": "^1.0.5",
         "webpack-stream": "^4.0.0"
+    },
+    "dependencies": {
+        "bootstrap": "4.0.0-beta.2",
+        "font-awesome": "^4.7.0",
+        "jquery": "^3.2.1",
+        "popper.js": "^1.12.6"
     }
 }

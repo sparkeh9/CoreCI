@@ -1,8 +1,7 @@
 ﻿require('sass/main.scss');
-
-import { Aurelia, PLATFORM } from 'aurelia-framework';
-import { ValidationControllerFactory, ValidationController, validationMessages, ValidationRules } from 'aurelia-validation';
-declare var module: any;
+import $ from 'jquery';
+import 'popper.js';
+import { Aurelia, PLATFORM, TemplatingEngine} from 'aurelia-framework';
 
 export function configure( aurelia: Aurelia )
 {
@@ -13,5 +12,16 @@ export function configure( aurelia: Aurelia )
         .developmentLogging();
 
     aurelia.start()
-        .then(() => aurelia.setRoot(PLATFORM.moduleName('app')));
+        .then( a =>
+        {
+            const templatingEngine: TemplatingEngine = a.container.get(TemplatingEngine);
+//            templatingEngine.enhance({
+//                container: a.container,
+//                element: document.querySelector('my-component'),
+//                resources: a.resources
+//            });
+
+//            return aurelia.setRoot( PLATFORM.moduleName( 'app' ) );
+        } );
+//           .then(() => aurelia.setRoot(PLATFORM.moduleName('app')));
 }

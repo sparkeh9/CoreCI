@@ -6,6 +6,7 @@
         "lib": [ "es6", "dom" ],
         "importHelpers": true,
         "sourceMap": true,
+        "emitDecoratorMetadata": true,
         "experimentalDecorators": true
     }
 }

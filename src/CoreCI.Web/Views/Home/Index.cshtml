@@ -1,6 +1,11 @@
 ﻿@{
     ViewData[ "Title" ] = "Home Page";
 }
-<div aurelia-app="main" >
-    
-</div>
+<script id="AppView" type="x-tmpl-aurelia" >
+    <template>
+        @Url.Action("Details","Jobs",new{area=""})
+        <button click.delegate="greet()">
+            ${text}
+        </button>
+    </template>
+</script>

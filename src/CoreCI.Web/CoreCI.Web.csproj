@@ -14,6 +14,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="App\sass\coreui\**" />
+      <Content Remove="App\sass\coreui\**" />
+      <EmbeddedResource Remove="App\sass\coreui\**" />
+      <None Remove="App\sass\coreui\**" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
         <PackageReference Include="LINQKit.Core" Version="1.1.9" />
         <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
@@ -32,11 +39,9 @@
 
     <ItemGroup>
         <Folder Include="Api\v1\Models\" />
-        <Folder Include="App\sass\" />
-        <Folder Include="Controllers\" />
         <Folder Include="Models\" />
         <Folder Include="Views\Shared\" />
-        <Folder Include="wwwroot\dist\" />
+        <Folder Include="wwwroot\" />
     </ItemGroup>
 
     <ItemGroup>
