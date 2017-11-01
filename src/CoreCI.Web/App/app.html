@@ -1,0 +1,21 @@
+<template>
+    <!-- Navbar -->
+    <compose view="./common/navbar.html"></compose>
+    
+    <div class="app-body" >
+        
+        <!-- Navigation -->
+        <compose view="./common/sidebar-nav.html" ></compose>
+
+        <!-- Main content -->
+        <main class="main" >
+            <div class="container-fluid" >
+                <router-view></router-view>
+            </div>
+        </main>
+
+    </div>
+    <!-- Aside Menu -->#
+    <compose view="./common/aside-menu.html"></compose>
+    <compose view="./common/footer.html"></compose>
+</template>

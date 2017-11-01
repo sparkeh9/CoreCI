@@ -6,6 +6,7 @@
         "@types/node": "^8.0.34",
         "aspnet-webpack": "^2.0.1",
         "aurelia-bootstrapper": "^2.1.1",
+        "aurelia-bootstrapper-webpack": "^1.1.0",
         "aurelia-computed": "^1.0.0",
         "aurelia-loader-webpack": "^2.1.0",
         "aurelia-validation": "^1.1.2",
@@ -34,9 +35,17 @@
         "webpack-stream": "^4.0.0"
     },
     "dependencies": {
+        "aurelia-authentication": "^3.7.0",
+        "bluebird": "^3.4.6",
         "bootstrap": "4.0.0-beta.2",
+        "bootstrap-datepicker": "^1.6.1",
+        "chart.js": "^2.4.0",
+        "devbridge-autocomplete": "^1.2.27",
         "font-awesome": "^4.7.0",
         "jquery": "^3.2.1",
-        "popper.js": "^1.12.6"
+        "moment": "^2.17.0",
+        "numeral": "^2.0.1",
+        "popper.js": "^1.12.6",
+        "tether": "latest"
     }
 }

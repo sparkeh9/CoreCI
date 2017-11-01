@@ -17,7 +17,7 @@ module.exports = {
         rules: [
             { test: /\.html$/i, loaders: 'html-loader' },
             { test: /\.ts$/i, loaders: 'ts-loader' },
-            { test: /\.svg$/, use: [ { loader: 'url-loader', options: { limit: 0, name: '[name].[ext]' } } ] },
+            { test: /\.svg$/, use: [ { loader: 'url-loader', options: { limit: 4096, name: '[name].[ext]' } } ] },
             {
                 test: /\.(eot|woff|woff2|ttf|png|jpe?g|gif)$/,
                 use: [
@@ -25,7 +25,7 @@ module.exports = {
                         loader: 'url-loader',
                         options:
                         {
-                            limit: 8192,
+                            limit: 4096,
                             name: '[name].[ext]'
                         }
                     }

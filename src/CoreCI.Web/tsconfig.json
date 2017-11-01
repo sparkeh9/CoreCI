@@ -8,5 +8,17 @@
         "sourceMap": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true
-    }
+    },
+    "filesGlob": [
+        "./App/src/**/*.ts",
+        "./Aurelia/typings/index.d.ts",
+        "./Aurelia/custom_typings/**/*.d.ts",
+        "./Aurelia/jspm_packages/**/*.d.ts",
+        "./node_modules/**/*.d.ts"
+    ],
+    "exclude": [
+        "./node_modules/",
+        "./jspm_packages/",
+        "./dist/"
+    ]
 }

@@ -3,62 +3,16 @@
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-        <title>@ViewData[ "Title" ] - CoreCI.Web</title>
+        <title>@ViewData[ "Title" ] - CoreCI</title>
         <environment include="Development" >
             <link href="~/dist/style.css" rel="stylesheet" />
         </environment>
         <environment exclude="Development" >
             <link asp-append-version="true" href="~/dist/style.css" rel="stylesheet" />
         </environment>
-        @* Used to bootstrap aurelia*@
-        <meta aurelia-app="main" />
     </head>
-    <body class="app aside-menu-fixed aside-menu-hidden header-fixed sidebar-fixed" >
-
-        <header class="app-header navbar" >
-            <button class="d-lg-none mobile-sidebar-toggler mr-auto navbar-toggler" type="button" >
-                <span class="navbar-toggler-icon" ></span>
-            </button>
-            <a class="navbar-brand" href="#" ></a>
-            <button class="d-md-down-none navbar-toggler sidebar-toggler" type="button" >
-                <span class="navbar-toggler-icon" ></span>
-            </button>
-        </header>
-        <div class="app-body" >
-            <div class="sidebar" >
-                <nav class="sidebar-nav" >
-                    <ul class="nav" >
-                        <li class="nav-item" >
-                            <a ></a>
-                            <a asp-action="Index" asp-controller="Home" class="nav-link" >
-                                <i class="icon-speedometer" ></i> Dashboard <span class="badge badge-primary" >NEW</span>
-                            </a>
-                        </li>
-                        <li class="nav-item" >
-                            <a asp-action="Index" asp-controller="Projects" class="nav-link" >
-                                <i class="icon-folder-alt" ></i> Projects
-                            </a>
-                        </li>
-
-                    </ul>
-                </nav>
-                <button class="brand-minimizer sidebar-minimizer" type="button" ></button>
-            </div>
-            <!-- Main content -->
-            <main class="main" >
-
-                <div class="container-fluid" >
-                    <div class="animated fadein" >
-                        @RenderBody()
-                    </div>
-                </div>
-                <!-- /.conainer-fluid -->
-            </main>
-
-        </div>
-
-        <footer class="app-footer" >
-        </footer>
+    <body aurelia-app="@ViewData[ "AureliaApp" ]" class="app header-fixed sidebar-fixed aside-menu-fixed aside-menu-hidden" >
+        @RenderBody()
         <environment include="Development" >
             <script src="/dist/vendor.js" ></script>
             <script src="/dist/main.js" ></script>
@@ -69,4 +23,5 @@
         </environment>
         @RenderSection( "Scripts", required : false )
     </body>
+
 </html>

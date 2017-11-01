@@ -1,18 +1,33 @@
-import { noView, InlineViewStrategy } from 'aurelia-framework';
-
-export class AppViewModel
+import { autoinject, PLATFORM } from 'aurelia-framework';
+import { RouterConfiguration, Router } from 'aurelia-router';
+@autoinject
+export default class App
 {
-    private readonly text: string;
-    constructor() {
-        this.text = "Hello world";
-    }
+    private router: Router;
 
-    greet() {
-        alert('test');
-    }
-
-    getViewStrategy()
+    public configureRouter( config: RouterConfiguration, router: Router )
     {
-        return new InlineViewStrategy(document.getElementById('AppView').innerHTML);
+        this.router = router;
+        config.title = 'Checkout';
+
+        config.map([
+            {
+                route: ['', 'dashboard'],
+                name: 'dashboard',
+                moduleId: PLATFORM.moduleName('modules/dashboard/dashboard'),
+                title: 'Dashboard',
+                nav: true,
+                settings: {
+                    icon: 'icon-speedometer',
+                    isNew: false
+                }
+            },
+            {
+                route: 'projects',
+                name: 'projects',
+                moduleId: PLATFORM.moduleName('./modules/projects/projects'),
+                nav: true,
+                title: 'Projects',
+            }]);
     }
 }
