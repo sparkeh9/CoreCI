@@ -6,16 +6,22 @@ export default class App
 {
     private router: Router;
 
+    
+    public attached()
+    {
+        this.mapNavigation( this.router );
+    }
+
     public configureRouter( config: RouterConfiguration, router: Router )
     {
         this.router = router;
-        config.title = 'Checkout';
+        config.title = 'CoreCI';
 
-        config.map([
+        config.map( [
             {
-                route: ['', 'dashboard'],
+                route: [ '', 'dashboard' ],
                 name: 'dashboard',
-                moduleId: PLATFORM.moduleName('modules/dashboard/dashboard'),
+                moduleId: PLATFORM.moduleName( 'modules/dashboard/dashboard' ),
                 title: 'Dashboard',
                 nav: true,
                 settings: {
@@ -26,9 +32,45 @@ export default class App
             {
                 route: 'projects',
                 name: 'projects',
-                moduleId: PLATFORM.moduleName('./modules/projects/projects'),
+                moduleId: PLATFORM.moduleName( './modules/projects/projects' ),
                 nav: true,
                 title: 'Projects',
-            }]);
+            },
+            {
+                route: 'projects/add',
+                name: 'projects-add',
+                moduleId: PLATFORM.moduleName( './modules/projects/add' ),
+                nav: true,
+                title: 'Add Project',
+                settings: {
+                    parentRoute: 'projects'
+                }
+            }
+        ] );
+    }
+
+    private mapNavigation( router )
+    {
+        console.log( 'Map children to navigation items.' );
+        var menuItems: any[] = [];
+        router.navigation.forEach( menuItem =>
+        {
+            if( menuItem.settings.parentRoute )
+            {
+                // Submenu children
+                const parent = menuItems.find( x => x.relativeHref == menuItem.settings.parentRoute );
+                // If it doesn't exist, then something went wrong, so not checking
+                parent.children.push( menuItem );
+            }
+            else
+            {
+                // Just insert.  It should not be there multiple times or it's a bad route
+                menuItems[ menuItem ] = menuItems[ menuItem ] || [];
+                // Create empty children
+                menuItem.children = [];
+                menuItems.push( menuItem );
+            }
+        } );
+        return menuItems;
     }
 }

@@ -1,4 +1,4 @@
-import {autoinject, PLATFORM, containerless} from 'aurelia-framework';
+import {autoinject, containerless} from 'aurelia-framework';
 import {Router} from 'aurelia-router';
 
 @autoinject

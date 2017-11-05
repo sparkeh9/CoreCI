@@ -20,7 +20,7 @@ gulp.task('webpack:prod', function () {
 gulp.task('webpack:cleanup', function () {
     var regexp = /\w*(\-\w{8}\.js){1}$|\w*(\-\w{8}\.css){1}$/;
     gulp.src( [
-        './wwwroot/dist/style.*',
+        './wwwroot/dist/style.*'
     ] ).pipe( deletefile( {
         reg: regexp,
         deleteMatch: false

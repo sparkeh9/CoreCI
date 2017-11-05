@@ -1,6 +1,6 @@
 ﻿const webpack = require( 'webpack' );
 const path = require( 'path' );
-const { AureliaPlugin } = require( 'aurelia-webpack-plugin' );
+const { AureliaPlugin, ModuleDependenciesPlugin } = require( 'aurelia-webpack-plugin' );
 
 module.exports = {
     entry: {
@@ -46,7 +46,9 @@ module.exports = {
                 return isExternal( module );
             }
         } ),
-        new AureliaPlugin()
+        new AureliaPlugin(),
+        new ModuleDependenciesPlugin( {
+        } )
     ]
 }
 
