@@ -21,7 +21,7 @@ export default class App
             {
                 route: [ '', 'dashboard' ],
                 name: 'dashboard',
-                moduleId: PLATFORM.moduleName( 'modules/dashboard/dashboard' ),
+                moduleId: PLATFORM.moduleName( './Modules/Dashboard/Dashboard' ),
                 title: 'Dashboard',
                 nav: true,
                 settings: {
@@ -32,14 +32,14 @@ export default class App
             {
                 route: 'projects',
                 name: 'projects',
-                moduleId: PLATFORM.moduleName( './modules/projects/projects' ),
+                moduleId: PLATFORM.moduleName( './Modules/Projects/Projects' ),
                 nav: true,
                 title: 'Projects',
             },
             {
                 route: 'projects/add',
                 name: 'projects-add',
-                moduleId: PLATFORM.moduleName( './modules/projects/add' ),
+                moduleId: PLATFORM.moduleName( './Modules/Projects/Add' ),
                 nav: true,
                 title: 'Add Project',
                 settings: {

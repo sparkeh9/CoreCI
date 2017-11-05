@@ -7,8 +7,8 @@ export async function configure( aurelia: Aurelia )
         .standardConfiguration()
         .developmentLogging()
         .plugin( PLATFORM.moduleName( 'aurelia-plugins-tabs' ) )
-        .feature( PLATFORM.moduleName( 'components/index' ) );
+        .feature( PLATFORM.moduleName( 'Components/Index' ) );
 
     await aurelia.start();
-    aurelia.setRoot( PLATFORM.moduleName( 'app' ) );
+    aurelia.setRoot( PLATFORM.moduleName( 'App' ) );
 }

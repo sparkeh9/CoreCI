@@ -2,7 +2,7 @@ import { autoinject } from 'aurelia-framework';
 import { Router } from 'aurelia-router';
 
 @autoinject
-export default class Projects
+export class Projects
 {
     private readonly router: Router;
 

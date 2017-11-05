@@ -1,17 +1,19 @@
-import { autoinject } from 'aurelia-framework';
+import { autoinject, PLATFORM } from 'aurelia-framework';
 import { RouterConfiguration, Router } from 'aurelia-router';
 
 @autoinject
-export default class Projects
+export class AddProjectViewModel
 {
-    private readonly myTabValues: any;
+    private readonly myTabs: any;
+    public vcsConfig: any;
+    public viewmodels: any = {
+        git: PLATFORM.moduleName( 'modules/projects/VcsForms/Git' )
+    };
 
     constructor()
     {
-        this.myTabValues = [
-            { id: 'section-one', label: 'My First Section', selected: true },
-            { id: 'section-two', label: 'Users' },
-            { id: 'section-three', label: 'Browse Items' }
+        this.myTabs = [
+            { id: 'git', label: 'Git', active: true }
         ];
     }
 }

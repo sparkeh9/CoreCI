@@ -2,5 +2,5 @@
 
 export function configure( config:any )
 {
-    config.globalResources( PLATFORM.moduleName( './breadcrumbs/breadcrumbs' ) );
+    config.globalResources( PLATFORM.moduleName( './breadcrumbs/Breadcrumbs' ) );
 }
