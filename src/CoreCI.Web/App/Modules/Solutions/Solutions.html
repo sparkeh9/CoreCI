@@ -3,12 +3,12 @@
 
         <div class="row" >
             <div class="col-lg-3 col-sm-6" >
-                <h2>Projects</h2>
+                <h2>Solutions</h2>
             </div>
         </div>
         <div class="row" >
             <div class="col-lg-1" >
-                <a click.delegate="addProject()" class="btn btn-primary my-2" role="button" >Add new project</a>
+                <a click.delegate="addSolution()" class="btn btn-primary my-2" role="button" >Add new Solution</a>
             </div>
         </div>
 
@@ -24,15 +24,16 @@
                         <table class="table table-bordered table-striped table-condensed">
                             <thead>
                                 <tr>
-                                    <th>Project Name</th>
+                                    <th>Solution Name</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>CoreCI</td>
-                                </tr>
-                                <tr>
-                                    <td>CoreFTP</td>
+                                <tr repeat.for="item of solutions.values" >
+                                    <td>
+                                        <a route-href="route: solutions-detail; params.bind: {id:item.id}">
+                                            ${item.name}
+                                        </a>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

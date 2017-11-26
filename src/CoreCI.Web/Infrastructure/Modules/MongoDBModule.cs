@@ -33,6 +33,13 @@
             builder.Register( cc => new MongoClient( mongoDbOptions.ConnectionString ) )
                    .AsSelf()
                    .InstancePerDependency();
+            
+            builder.Register( cc => cc.Resolve<MongoClient>()
+                                      .GetDatabase( mongoDbOptions.DatabaseName )
+                                      .GetCollection<Solution>( new Solution().CollectionName ) )
+                   .As<IMongoCollection<Solution>>()
+                   .InstancePerDependency();
+
 
             builder.Register( cc => cc.Resolve<MongoClient>()
                                       .GetDatabase( mongoDbOptions.DatabaseName )
@@ -46,16 +53,19 @@
                    .As<IMongoCollection<Job>>()
                    .InstancePerDependency();
 
+
+            BsonClassMap.RegisterClassMap<Solution>();
+
             BsonClassMap.RegisterClassMap<ProjectBase>();
             BsonClassMap.RegisterClassMap<GitProject>();
             BsonClassMap.RegisterClassMap<BitBucketGitProject>();
-
 
             BsonClassMap.RegisterClassMap<VcsJob>();
             BsonClassMap.RegisterClassMap<BitBucketGitVcsJob>();
             BsonClassMap.RegisterClassMap<GitVcsJob>();
 
 
+            builder.RegisterType<SolutionRepository>().As<ISolutionRepository>();
             builder.RegisterType<ProjectRepository>().As<IProjectRepository>();
             builder.RegisterType<JobRepository>().As<IJobRepository>();
         }

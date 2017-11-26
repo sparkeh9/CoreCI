@@ -15,6 +15,7 @@ module.exports = {
     },
     module: {
         rules: [
+            { test: /\.json$/, loader: 'json-loader' },
             { test: /\.html$/i, loaders: 'html-loader' },
             { test: /\.ts$/i, loaders: 'ts-loader' },
             { test: /\.svg$/, use: [ { loader: 'url-loader', options: { limit: 4096, name: '[name].[ext]' } } ] },

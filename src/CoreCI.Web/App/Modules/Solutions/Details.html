@@ -1,0 +1,35 @@
+﻿<template>
+    <form submit.delegate="addSolution()" validate.bind="controller.validate" >
+        <div class="animated fadeIn" >
+            <div class="row" >
+                <div class="col-lg-12 col-sm-12" >
+                    <h2>Add a Solution</h2>
+                </div>
+            </div>
+
+            <div class="card" >
+                <div class="card-block" >
+                    <div class="row" >
+                        <div class="col-lg-6" >
+                            <div class="input-group input-group-lg" >
+                                <input class="form-control" id="search-church" placeholder="Solution Name" type="text" value.bind="model.name & validate"  validation-errors.bind="nameErrors" class.bind="nameErrors.length ? 'is-invalid' : ''">
+                                <span class="input-group-btn" >
+                                    <button class="btn btn-primary" type="submit" >Add</button>
+                                </span> 
+                            </div>
+                            <div if.bind="nameErrors.length" class="invalid-feedback d-flex">
+                                Please provide a Solution name
+                            </div>                    
+
+                        </div>
+                    </div>
+                    <!--        <aup-tabs tabs.bind="myTabs" ></aup-tabs>-->
+                    <!--        <aup-tab-content>-->
+                    <!--            <aup-tab-pane model.bind="vcsConfig" tab="git" view-model.bind="viewmodels.git" ></aup-tab-pane>-->
+                    <!--        </aup-tab-content>-->
+                </div>
+            </div>
+
+        </div>
+    </form>
+</template>

@@ -1,8 +1,14 @@
 ﻿import { autoinject } from 'aurelia-framework';
 import { HttpClientConfiguration, HttpClient, json } from 'aurelia-fetch-client';
-import config from 'config/app.config.json!json';
+import {ListSolutionsDto} from '../Models/Dto/solutions/ListSolutionsDto';
+import {AddSolutionDto} from '../Models/Dto/solutions/AddSolutionDto';
+import {Solution} from '../Models/Dto/solutions/Solution';
+import {IPagedResult} from '../Models/Dto/solutions/IPagedResult';
 
-export class ProjectService
+var config = require( '../Config/app.config.json' );
+
+@autoinject
+export class SolutionService
 {
     private readonly httpClient: HttpClient;
 
@@ -25,11 +31,18 @@ export class ProjectService
         this.httpClient = httpClient;
     }
 
-    public async addProject()
+    public async listSolutions( filter: ListSolutionsDto ): Promise<IPagedResult<Solution>>
     {
-        await this.httpClient.fetch( config.api.projects.add, {
+        return ( await this.httpClient.fetch( config.api.solutions.list, {
+            method: 'get'
+        } ) ).json();
+    }
+
+    public async addSolution( project: AddSolutionDto )
+    {
+        await this.httpClient.fetch( config.api.solutions.add, {
             method: 'post',
-            body: json( {} )
+            body: json( project )
         } );
     }
 }

@@ -6,7 +6,6 @@ export default class App
 {
     private router: Router;
 
-    
     public attached()
     {
         this.mapNavigation( this.router );
@@ -30,22 +29,32 @@ export default class App
                 }
             },
             {
-                route: 'projects',
-                name: 'projects',
-                moduleId: PLATFORM.moduleName( './Modules/Projects/Projects' ),
+                route: 'solutions',
+                name: 'solutions',
+                moduleId: PLATFORM.moduleName( './Modules/Solutions/Solutions' ),
                 nav: true,
-                title: 'Projects',
+                title: 'Solutions',
             },
             {
-                route: 'projects/add',
-                name: 'projects-add',
-                moduleId: PLATFORM.moduleName( './Modules/Projects/Add' ),
+                route: 'solutions/add',
+                name: 'solutions-add',
+                moduleId: PLATFORM.moduleName( './Modules/Solutions/Add' ),
                 nav: true,
-                title: 'Add Project',
+                title: 'Add Solutions',
                 settings: {
-                    parentRoute: 'projects'
+                    parentRoute: 'solutions'
                 }
-            }
+            },
+            {
+                route: 'solutions/:id',
+                name: 'solutions-detail',
+                moduleId: PLATFORM.moduleName( './Modules/Solutions/Details' ),
+                nav: false,
+                title: 'Solution Details',
+                settings: {
+                    parentRoute: 'solutions'
+                }
+            },
         ] );
     }
 

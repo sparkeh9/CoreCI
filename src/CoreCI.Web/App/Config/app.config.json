@@ -1,8 +1,9 @@
 {
     "api": {
-        "base": "",
-        "projects": {
-            "add": "/projects/add" 
+        "base": "/api/v1",
+        "solutions": {
+            "list": "/solutions" ,
+            "add": "/solutions/add" 
         } 
     }
 }
