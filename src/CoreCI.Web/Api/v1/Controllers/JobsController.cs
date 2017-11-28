@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Common.Data.Repository;
     using Common.Data.Repository.Model;
@@ -32,14 +33,14 @@
         ///     Lists jobs up for grabs
         /// </summary>
         [ HttpGet ]
-        public async Task<IActionResult> Index( [ FromQuery ] GetJobsRequest request )
+        public async Task<IActionResult> Index( [ FromQuery ] GetJobsRequest request, CancellationToken cancellationToken  )
         {
             var results = await jobRepository.ListByAsync( new JobQuery
             {
                 BuildEnvironments = request.Environments,
                 Page = request.Page,
                 JobStatus = request.JobStatus
-            } );
+            }, cancellationToken );
 
             return Json( new PagedResponse<JobDto>
             {
@@ -65,11 +66,11 @@
         /// <returns></returns>
         [ HttpGet ]
         [ Route( "{jobId:ObjectId}" ) ]
-        public async Task<IActionResult> Details( string jobId )
+        public async Task<IActionResult> Details( string jobId, CancellationToken cancellationToken  )
         {
             var objectId = ObjectId.Parse( jobId );
 
-            var job = await jobRepository.FindByIdAsync( objectId );
+            var job = await jobRepository.FindByIdAsync( objectId, cancellationToken );
 
             if ( job == null )
             {
@@ -91,10 +92,10 @@
         /// <returns></returns>
         [ HttpPost ]
         [ Route( "{jobId:ObjectId}/reserve" ) ]
-        public async Task<IActionResult> Reserve( string jobId )
+        public async Task<IActionResult> Reserve( string jobId, CancellationToken cancellationToken  )
         {
             var objectId = ObjectId.Parse( jobId );
-            var job = await jobRepository.FindByIdAsync( objectId );
+            var job = await jobRepository.FindByIdAsync( objectId, cancellationToken );
 
             if ( !job.BuildAgentToken.IsNullOrWhiteSpace() )
             {
@@ -103,7 +104,7 @@
 
             job.BuildAgentToken = Guid.NewGuid().ToString( "N" );
             job.JobStatus = JobStatus.Reserved;
-            await jobRepository.PersistAsync( job );
+            await jobRepository.PersistAsync( job, cancellationToken );
 
             return Json( new JobReservedDto
             {
@@ -118,9 +119,9 @@
         /// <returns></returns>
         [ HttpPost ]
         [ Route( "report" ) ]
-        public async Task<IActionResult> Report( [ FromBody ] JobProgressDto jobProgress )
+        public async Task<IActionResult> Report( [ FromBody ] JobProgressDto jobProgress, CancellationToken cancellationToken  )
         {
-            await jobRepository.AppendReportProgressAsync( jobProgress );
+            await jobRepository.AppendReportProgressAsync( jobProgress, cancellationToken );
             return Ok();
         }
     }

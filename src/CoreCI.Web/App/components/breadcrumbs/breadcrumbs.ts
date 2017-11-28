@@ -18,7 +18,6 @@ export class Breadcrumbs
 
     public navigate( navigationInstruction )
     {
-        console.log( 'Navigate to:', navigationInstruction );
         navigationInstruction.router.navigateToRoute( navigationInstruction.config.name, navigationInstruction.params );
     }
 }

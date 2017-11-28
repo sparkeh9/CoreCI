@@ -1,5 +1,6 @@
 ﻿namespace CoreCI.Web.Api.v1.Controllers
 {
+    using System.Threading;
     using Common.Models.Agents;
     using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +18,7 @@
         /// <returns></returns>
         [ HttpPost ]
         [ Route( "register" ) ]
-        public IActionResult Register( RegisterAgentDto dto )
+        public IActionResult Register( RegisterAgentDto dto, CancellationToken cancellationToken )
         {
             return new OkResult();
         }
@@ -28,7 +29,7 @@
         /// <returns></returns>
         [ HttpPost ]
         [ Route( "deregister" ) ]
-        public IActionResult Deregister()
+        public IActionResult Deregister( CancellationToken cancellationToken )
         {
             return new OkResult();
         }

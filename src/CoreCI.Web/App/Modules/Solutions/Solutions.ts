@@ -1,36 +1,35 @@
-import { autoinject } from 'aurelia-framework';
-import { Router } from 'aurelia-router';
-import { SolutionService } from '../../Services/SolutionService';
-import { ListSolutionsDto } from '../../Models/Dto/solutions/ListSolutionsDto';
-import {IPagedResult} from '../../Models/Dto/solutions/IPagedResult';
-import {Solution} from '../../Models/Dto/solutions/Solution';
-
+import { autoinject, PLATFORM } from 'aurelia-framework';
+import { RouterConfiguration, Router } from 'aurelia-router';
 @autoinject
-export class Projects
+export class Solutions
 {
-    private readonly router: Router;
-    private readonly solutionService: SolutionService;
-    private searchDto: ListSolutionsDto;
+    private router: Router;
 
-    private solutions: IPagedResult<Solution>;
-
-    constructor( router: Router, solutionService: SolutionService )
+    public configureRouter( config: RouterConfiguration, router: Router )
     {
         this.router = router;
-        this.solutionService = solutionService;
-        this.searchDto = {
-            name: '',
-            page: 1
-        };
-    }
 
-    private async activate()
-    {
-        this.solutions = await this.solutionService.listSolutions( this.searchDto );
-    }
-
-    public addSolution(): void
-    {
-        this.router.navigate( 'solutions/add' );
+        config.map( [
+            {
+                route: ['','list'],
+                name: 'solutions-add',
+                moduleId: PLATFORM.moduleName( './List' ),
+                title: 'List'
+            },
+            {
+                route: 'add',
+                name: 'solutions-add',
+                moduleId: PLATFORM.moduleName( './Add' ),
+                nav: true,
+                title: 'Add'
+            },
+            {
+                route: ':id',
+                name: 'solutions-detail',
+                moduleId: PLATFORM.moduleName( './Details' ),
+                nav: false,
+                title: 'Details'
+            },
+        ] );
     }
 }

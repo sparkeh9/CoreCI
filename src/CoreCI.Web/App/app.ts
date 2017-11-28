@@ -31,30 +31,10 @@ export default class App
             {
                 route: 'solutions',
                 name: 'solutions',
-                moduleId: PLATFORM.moduleName( './Modules/Solutions/Solutions' ),
-                nav: true,
                 title: 'Solutions',
-            },
-            {
-                route: 'solutions/add',
-                name: 'solutions-add',
-                moduleId: PLATFORM.moduleName( './Modules/Solutions/Add' ),
-                nav: true,
-                title: 'Add Solutions',
-                settings: {
-                    parentRoute: 'solutions'
-                }
-            },
-            {
-                route: 'solutions/:id',
-                name: 'solutions-detail',
-                moduleId: PLATFORM.moduleName( './Modules/Solutions/Details' ),
-                nav: false,
-                title: 'Solution Details',
-                settings: {
-                    parentRoute: 'solutions'
-                }
-            },
+                moduleId: PLATFORM.moduleName( './Modules/Solutions/Solutions' ),
+                nav: true
+            }
         ] );
     }
 

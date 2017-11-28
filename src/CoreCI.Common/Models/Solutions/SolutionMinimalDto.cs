@@ -5,13 +5,11 @@
     using MongoDB.Bson;
     using Newtonsoft.Json;
 
-    public class SolutionDto
+    public class SolutionMinimalDto
     {
         [ JsonConverter( typeof( MongoObjectIdConverter ) ) ]
         public ObjectId Id { get; set; }
-
         public string Name { get; set; }
-
         public Dictionary<string, Link> Links { get; set; }
     }
 }

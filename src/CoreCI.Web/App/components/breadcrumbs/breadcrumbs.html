@@ -1,6 +1,6 @@
 <template>
     <li class="breadcrumb-item">
-        <a href="#/dashboard"> Home</a>
+        <a href="#/dashboard">Home</a>
     </li>
     <template repeat.for="navigationInstruction of router.currentInstruction.getAllInstructions()">
         <li class="breadcrumb-item ${$last ? 'active' : ''}">

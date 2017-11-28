@@ -99,15 +99,6 @@
                 app.UseExceptionHandler( "/Home/Error" );
             }
 
-            app.UseStaticFiles();
-            app.UseMvc( routes =>
-                        {
-                            routes.MapRoute( name : "default",
-                                             template : "{controller=Home}/{action=Index}/{id?}" );
-
-                            routes.MapSpaFallbackRoute("spa-fallback", new { controller = "Home", action = "Index" });
-                        } );
-
             app.UseSwagger();
             app.UseSwaggerUI( options =>
                               {
@@ -117,6 +108,13 @@
                                       options.SwaggerEndpoint( $"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant() );
                                   }
                               } );
+
+            app.UseStaticFiles();
+            app.UseMvc( routes =>
+                        {
+                            routes.MapRoute( "default", "{controller=Home}/{action=Index}/{id?}" );
+                            routes.MapSpaFallbackRoute( "spa-fallback", new { controller = "Home", action = "Index" } );
+                        } );
         }
 
         private static Info CreateInfoForApiVersion( ApiVersionDescription description )

@@ -18,6 +18,8 @@
         [ JsonConverter( typeof( MongoObjectIdConverter ) ) ]
         public ObjectId Solution { get; set; }
 
+        public string Name { get; set; }
+        public string Description { get; set; }
         public BuildEnvironmentOs Environment { get; set; }
         public virtual VcsType VcsType { get; }
     }

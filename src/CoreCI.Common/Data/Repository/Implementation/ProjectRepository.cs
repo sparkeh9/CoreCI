@@ -1,5 +1,6 @@
 ﻿namespace CoreCI.Common.Data.Repository.Implementation
 {
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using MongoDb.Project;
@@ -19,6 +20,12 @@
         {
             return await projectCollection.Find( x => x.Id == id )
                                           .SingleOrDefaultAsync( cancellationToken );
+        }
+
+        public async Task<IReadOnlyCollection<ProjectBase>> FindBySolutionIdAsync( ObjectId solutionId, CancellationToken cancellationToken = new CancellationToken() )
+        {
+            return await projectCollection.Find( x => x.Solution == solutionId )
+                                          .ToListAsync( cancellationToken );
         }
 
         public async Task CreateAsync( ProjectBase project, CancellationToken cancellationToken = new CancellationToken() )
