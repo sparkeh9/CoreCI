@@ -3,7 +3,7 @@
 
         <div class="row" >
             <div class="col-lg-3 col-sm-6" >
-                <h2>Solutions</h2>
+                <h2>Projects</h2>
             </div>
         </div>
         <div class="row" >
@@ -30,7 +30,7 @@
                             <tbody>
                                 <tr repeat.for="item of solutions.values" >
                                     <td>
-                                        <a route-href="route: solution-projects; params.bind: {id:item.id}">
+                                        <a route-href="route: solutions-detail; params.bind: {id:item.id}">
                                             ${item.name}
                                         </a>
                                     </td>

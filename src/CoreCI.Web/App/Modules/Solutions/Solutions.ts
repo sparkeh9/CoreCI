@@ -25,8 +25,8 @@ export class Solutions
             },
             {
                 route: ':id',
-                name: 'solutions-detail',
-                moduleId: PLATFORM.moduleName( './Details' ),
+                name: 'solution-projects',
+                moduleId: PLATFORM.moduleName( './Projects/Details' ),
                 nav: false,
                 title: 'Details'
             },

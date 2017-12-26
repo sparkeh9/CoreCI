@@ -31,9 +31,10 @@
             await solutionCollection.ReplaceOneAsync( x => x.Id == solution.Id, solution, cancellationToken : cancellationToken );
         }
 
-        public async Task CreateAsync( Solution solution, CancellationToken cancellationToken = new CancellationToken() )
+        public async Task<Solution> CreateAsync( Solution solution, CancellationToken cancellationToken = new CancellationToken() )
         {
             await solutionCollection.InsertOneAsync( solution, cancellationToken : cancellationToken );
+            return solution;
         }
 
         public async Task<IReadOnlyCollection<Solution>> ListByAsync( GetSolutionsRequest query, CancellationToken cancellationToken = new CancellationToken() )

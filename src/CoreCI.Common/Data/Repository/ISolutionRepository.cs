@@ -11,7 +11,7 @@
     {
         Task<Solution> FindByIdAsync( ObjectId id, CancellationToken cancellationToken = new CancellationToken() );
         Task PersistAsync( Solution solution, CancellationToken cancellationToken = new CancellationToken() );
-        Task CreateAsync( Solution solution, CancellationToken cancellationToken = new CancellationToken() );
+        Task<Solution> CreateAsync( Solution solution, CancellationToken cancellationToken = new CancellationToken() );
         Task<IReadOnlyCollection<Solution>> ListByAsync( GetSolutionsRequest query, CancellationToken cancellationToken = new CancellationToken() );
     }
 }

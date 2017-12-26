@@ -38,11 +38,11 @@ export class SolutionService
         } ) ).json();
     }
 
-    public async addSolution( project: AddSolutionDto )
+    public async addSolution( project: AddSolutionDto ): Promise<Solution>
     {
-        await this.httpClient.fetch( config.api.solutions.add, {
+        return ( await this.httpClient.fetch( config.api.solutions.add, {
             method: 'post',
             body: json( project )
-        } );
+        } ) ).json();
     }
 }

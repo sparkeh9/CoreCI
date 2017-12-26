@@ -1,20 +1,24 @@
 import { autoinject } from 'aurelia-framework';
+import { Router } from 'aurelia-router';
 import { ValidationControllerFactory, ValidationController, validationMessages, ValidationRules, Validator } from 'aurelia-validation';
 import { SolutionService } from '../../Services/SolutionService';
 import { ControllerValidateResult } from 'aurelia-validation';
 import { AddSolutionDto } from '../../Models/Dto/solutions/AddSolutionDto';
+import {Solution} from '../../Models/Dto/solutions/Solution';
 
 @autoinject
 export class AddSolutionViewModel
 {
-    public readonly controller: ValidationController;
+    private readonly controller: ValidationController;
+    private readonly router: Router;
     private readonly solutionService: SolutionService;
 
     public rules: any;
     public model: AddSolutionDto;
 
-    constructor( controllerFactory: ValidationControllerFactory, projectService: SolutionService )
+    constructor( controllerFactory: ValidationControllerFactory, projectService: SolutionService, router: Router)
     {
+        this.router = router;
         this.solutionService = projectService;
         this.model = {
             name:''
@@ -32,19 +36,9 @@ export class AddSolutionViewModel
             return;
         }
 
-        await this.solutionService.addSolution( this.model );
-
-//        this.controller.validate().then( async result =>
-//        {
-//            if( result.valid )
-//            {
-//                await this.projectService.addProject( this.model );
-//            }
-//            else
-//            {
-//                console.log( 'invalid' );
-//            }
-//        } );
+        let solution:Solution = await this.solutionService.addSolution( this.model );
+//        this.router.navigate( 'add' );
+        this.router.navigateToRoute('solutions-add', { id: solution.id }, { replace: true });
     }
 
     private defineRules()

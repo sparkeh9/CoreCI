@@ -15,7 +15,7 @@ export default class App
     {
         this.router = router;
         config.title = 'CoreCI';
-
+        config.options.pushState = true;
         config.map( [
             {
                 route: [ '', 'dashboard' ],

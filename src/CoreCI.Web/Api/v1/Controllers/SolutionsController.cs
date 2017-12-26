@@ -91,11 +91,20 @@
         [ Route( "add" ) ]
         public async Task<IActionResult> Add( [ FromBody ] SolutionMinimalDto solutionMinimalDto, CancellationToken cancellationToken )
         {
-            await solutionRepository.CreateAsync( new Solution
+            var saved = await solutionRepository.CreateAsync( new Solution
             {
                 Name = solutionMinimalDto?.Name
             }, cancellationToken );
-            return Ok();
+
+            return Json( new SolutionMinimalDto
+            {
+                Id = saved.Id,
+                Name = saved.Name,
+                Links = new Dictionary<string, Link>
+                {
+                    { "details", new Link( Url.Action( "Details", "Solutions", new { jobId = saved.Id }, Request.Scheme ) ) }
+                }
+            } );
         }
     }
 }

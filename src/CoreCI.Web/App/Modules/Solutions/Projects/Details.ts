@@ -14,8 +14,9 @@ export class SolutionDetailsViewModel
         config.map( [
             {
                 route: ['','list'],
-                name: 'solutions-add',
-                moduleId: PLATFORM.moduleName( './List' )
+                name: 'projects-add',
+                moduleId: PLATFORM.moduleName( './List' ),
+                title: 'List'
             }
         ] );
     }
