@@ -1,0 +1,21 @@
+<template>
+    <div class="sidebar">
+        <nav class="sidebar-nav">
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" route-href="route: dashboard">
+                        <i class="icon-home"></i> ${entry.text}Home
+                    </a>
+                </li>
+                <template repeat.for="entry of navigation.navigationEntries">
+                    <li class="nav-item">
+                        <a class="nav-link" href="${entry.url}">
+                            <i class="${entry.settings.icon ? entry.settings.icon :'icon-puzzle'}"></i> ${entry.text}
+                            <span class="tag tag-info" if.bind="entry.settings.isNew">NEW</span>
+                        </a>
+                    </li>
+                </template>
+            </ul>
+        </nav>
+    </div>
+</template>

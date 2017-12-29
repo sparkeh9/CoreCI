@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using CoreCI.Web.Models;
-
-namespace CoreCI.Web.Controllers
+﻿namespace CoreCI.Web.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+
     public class HomeController : Controller
     {
         public IActionResult Index()

@@ -1,0 +1,7 @@
+<template>
+    <div class="tab-pane ${tab.id == selectedTab.id ? 'active' : ''}"
+         id="tab-${tab}" >
+        <compose model.bind="model" view-model.bind="viewModel" ></compose>
+        <slot></slot>
+    </div>
+</template>

@@ -4,6 +4,10 @@
         "solutions": {
             "list": "/solutions" ,
             "add": "/solutions/add" 
+        } ,
+        "projects": {
+            "list": "/projects" ,
+            "add": "/projects/add" 
         } 
     }
 }

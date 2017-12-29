@@ -35,15 +35,15 @@
         /// </summary>
         /// <returns></returns>
         [ HttpGet ]
-        public async Task<IActionResult> Index( GetSolutionsRequest request, CancellationToken cancellationToken )
+        public async Task<IActionResult> Index( GetSolutionsQuery query, CancellationToken cancellationToken )
         {
-            var results = await solutionRepository.ListByAsync( request, cancellationToken );
+            var results = await solutionRepository.ListByAsync( query, cancellationToken );
 
             return Json( new PagedResponse<SolutionMinimalDto>
             {
-                Page = request.Page,
-                Next = Url.Action( "Index", "Solutions", new { page = request.Page + 1 }, Request.Scheme ),
-                Previous = request.Page <= 1 ? null : Url.Action( "Index", "Solutions", new { page = request.Page - 1 }, Request.Scheme ),
+                Page = query.Page,
+                Next = Url.Action( "Index", "Solutions", new { page = query.Page + 1 }, Request.Scheme ),
+                Previous = query.Page <= 1 ? null : Url.Action( "Index", "Solutions", new { page = query.Page - 1 }, Request.Scheme ),
                 Values = results.Select( x => new SolutionMinimalDto
                 {
                     Id = x.Id,

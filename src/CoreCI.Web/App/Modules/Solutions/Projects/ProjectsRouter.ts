@@ -1,7 +1,9 @@
 import { autoinject, PLATFORM } from 'aurelia-framework';
-import { RouterConfiguration, Router } from 'aurelia-router';
+import { RouterConfiguration } from 'aurelia-router/dist/aurelia-router';
+import { Router } from 'aurelia-router/dist/aurelia-router';
+
 @autoinject
-export class Solutions
+export class ProjectDetailsViewModel
 {
     private router: Router;
 
@@ -12,24 +14,18 @@ export class Solutions
         config.map( [
             {
                 route: ['','list'],
-                name: 'solutions-add',
+                name: 'projects-list',
                 moduleId: PLATFORM.moduleName( './List' ),
-                title: 'List'
+                title: 'List',
+                settings: {hideFromBreadcrumb:true}
             },
             {
                 route: 'add',
-                name: 'solutions-add',
+                name: 'projects-add',
                 moduleId: PLATFORM.moduleName( './Add' ),
                 nav: true,
                 title: 'Add'
-            },
-            {
-                route: ':id',
-                name: 'solution-projects',
-                moduleId: PLATFORM.moduleName( './Projects/Details' ),
-                nav: false,
-                title: 'Details'
-            },
+            }
         ] );
     }
 }

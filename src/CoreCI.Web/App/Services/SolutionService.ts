@@ -3,8 +3,8 @@ import { HttpClientConfiguration, HttpClient, json } from 'aurelia-fetch-client'
 import {ListSolutionsDto} from '../Models/Dto/solutions/ListSolutionsDto';
 import {AddSolutionDto} from '../Models/Dto/solutions/AddSolutionDto';
 import {Solution} from '../Models/Dto/solutions/Solution';
-import {IPagedResult} from '../Models/Dto/solutions/IPagedResult';
-
+import {IPagedResult} from '../Models/Dto/IPagedResult';
+import * as URI from 'urijs'
 var config = require( '../Config/app.config.json' );
 
 @autoinject
@@ -33,7 +33,11 @@ export class SolutionService
 
     public async listSolutions( filter: ListSolutionsDto ): Promise<IPagedResult<Solution>>
     {
-        return ( await this.httpClient.fetch( config.api.solutions.list, {
+        const uri = URI( config.api.solutions.list )
+            .search(filter)
+            .toString();
+
+        return ( await this.httpClient.fetch( uri, {
             method: 'get'
         } ) ).json();
     }

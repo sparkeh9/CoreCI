@@ -14,13 +14,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="FluentValidation">
+      <HintPath>C:\Users\spark\.nuget\packages\fluentvalidation\7.3.3\lib\netstandard2.0\FluentValidation.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\Projects\" />
   </ItemGroup>
 
 </Project>

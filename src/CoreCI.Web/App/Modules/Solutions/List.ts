@@ -2,7 +2,7 @@ import { autoinject } from 'aurelia-framework';
 import { Router } from 'aurelia-router';
 import { SolutionService } from '../../Services/SolutionService';
 import { ListSolutionsDto } from '../../Models/Dto/solutions/ListSolutionsDto';
-import { IPagedResult} from '../../Models/Dto/solutions/IPagedResult';
+import { IPagedResult} from '../../Models/Dto/IPagedResult';
 import { Solution } from '../../Models/Dto/solutions/Solution';
 
 @autoinject
@@ -31,6 +31,6 @@ export class List
 
     public addSolution(): void
     {
-        this.router.navigate( 'add' );
+        this.router.navigateToRoute( 'solutions-add' );
     }
 }

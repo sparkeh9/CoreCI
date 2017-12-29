@@ -1,14 +1,56 @@
-import { autoinject, PLATFORM } from 'aurelia-framework';
+import { autoinject, PLATFORM, observable } from 'aurelia-framework';
 import { RouterConfiguration, Router } from 'aurelia-router';
+import { EventAggregator } from 'aurelia-event-aggregator';
+import { INavigationEntry } from './Models/INavigationEntry';
+import { NavigationViewModel } from './Models/NavigationViewModel';
 
 @autoinject
 export default class App
 {
+    private readonly eventAggregator: EventAggregator;
     private router: Router;
+    
+    @observable
+    public navigation: NavigationViewModel;
+    private subscriber;
+
+    constructor( aggregator: EventAggregator )
+    {
+        this.eventAggregator = aggregator;
+    }
 
     public attached()
     {
-        this.mapNavigation( this.router );
+        this.subscriber = this.eventAggregator.subscribe( 'CoreCI:NavigationUpdated', response =>
+        {
+            if( response == null || response.length === 0 )
+            {
+                this.navigation = this.generateNav();
+            }
+            else
+            {
+                this.navigation = response;
+            }
+        } );
+
+
+        this.navigation = this.generateNav();
+    }
+
+    public generateNav(): NavigationViewModel
+    {
+        const navigation = new NavigationViewModel();
+        navigation.name = 'Dashboard';
+        navigation.navigationEntries = [
+            {
+                active: false,
+                text: 'Solutions',
+                url: this.router.generate( 'solutions' ),
+                settings: { icon: 'icon-layers' }
+            }
+        ] as INavigationEntry[];
+        
+        return navigation;
     }
 
     public configureRouter( config: RouterConfiguration, router: Router )
@@ -21,45 +63,14 @@ export default class App
                 route: [ '', 'dashboard' ],
                 name: 'dashboard',
                 moduleId: PLATFORM.moduleName( './Modules/Dashboard/Dashboard' ),
-                title: 'Dashboard',
-                nav: true,
-                settings: {
-                    icon: 'icon-speedometer',
-                    isNew: false
-                }
+                title: 'Dashboard'
             },
             {
                 route: 'solutions',
                 name: 'solutions',
                 title: 'Solutions',
-                moduleId: PLATFORM.moduleName( './Modules/Solutions/Solutions' ),
-                nav: true
+                moduleId: PLATFORM.moduleName( './Modules/Solutions/SolutionsRouter' )
             }
         ] );
-    }
-
-    private mapNavigation( router )
-    {
-        console.log( 'Map children to navigation items.' );
-        var menuItems: any[] = [];
-        router.navigation.forEach( menuItem =>
-        {
-            if( menuItem.settings.parentRoute )
-            {
-                // Submenu children
-                const parent = menuItems.find( x => x.relativeHref == menuItem.settings.parentRoute );
-                // If it doesn't exist, then something went wrong, so not checking
-                parent.children.push( menuItem );
-            }
-            else
-            {
-                // Just insert.  It should not be there multiple times or it's a bad route
-                menuItems[ menuItem ] = menuItems[ menuItem ] || [];
-                // Create empty children
-                menuItem.children = [];
-                menuItems.push( menuItem );
-            }
-        } );
-        return menuItems;
     }
 }

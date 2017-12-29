@@ -37,14 +37,14 @@
             return solution;
         }
 
-        public async Task<IReadOnlyCollection<Solution>> ListByAsync( GetSolutionsRequest query, CancellationToken cancellationToken = new CancellationToken() )
+        public async Task<IReadOnlyCollection<Solution>> ListByAsync( GetSolutionsQuery query, CancellationToken cancellationToken = new CancellationToken() )
         {
             return await GenerateListQueryExpression( query ).Skip( ( query.Page.EnsureAtLeast( 1 ) - 1 ) * 10 )
                                                              .Limit( 10 )
                                                              .ToListAsync( cancellationToken );
         }
 
-        private IFindFluent<Solution, Solution> GenerateListQueryExpression( GetSolutionsRequest query )
+        private IFindFluent<Solution, Solution> GenerateListQueryExpression( GetSolutionsQuery query )
         {
             var filter = BuildFilter( query );
 
@@ -59,7 +59,7 @@
                                      .Sort( Builders<Solution>.Sort.Combine( sortOptions ) );
         }
 
-        private FilterDefinition<Solution> BuildFilter( GetSolutionsRequest query )
+        private FilterDefinition<Solution> BuildFilter( GetSolutionsQuery query )
         {
             var expression = Builders<Solution>.Filter.Empty;
 

@@ -37,8 +37,7 @@ export class AddSolutionViewModel
         }
 
         let solution:Solution = await this.solutionService.addSolution( this.model );
-//        this.router.navigate( 'add' );
-        this.router.navigateToRoute('solutions-add', { id: solution.id }, { replace: true });
+        this.router.navigateToRoute('solution-projects', { id: solution.id }, { replace: true });
     }
 
     private defineRules()
@@ -53,23 +52,4 @@ export class AddSolutionViewModel
 
         this.controller.addObject( this.model, this.rules );
     }
-
-    //    private readonly myTabs: any;
-
-    //    public vcsConfig: any;
-
-    //    public viewmodels: any = {
-
-    //        git: PLATFORM.moduleName( 'modules/projects/VcsForms/Git' )
-
-    //    };
-
-//
-
-//    constructor()
-//    {
-//        this.myTabs = [
-//            { id: 'git', label: 'Git', active: true }
-//        ];
-//    }
 }

@@ -1,36 +1,39 @@
 import { autoinject } from 'aurelia-framework';
 import { Router } from 'aurelia-router';
-import {SolutionService} from '../../../Services/SolutionService';
-import {ListSolutionsDto} from '../../../Models/Dto/solutions/ListSolutionsDto';
-import {Solution} from '../../../Models/Dto/solutions/Solution';
-import {IPagedResult} from '../../../Models/Dto/solutions/IPagedResult';
+import { IPagedResult } from '../../../Models/Dto/IPagedResult';
+import { Project } from '../../../Models/Dto/projects/Solution';
+import { ProjectService } from '../../../Services/ProjectService';
+import { ListProjectsDto } from '../../../Models/Dto/projects/ListProjectsDto';
 
 @autoinject
-export class List
+export class ListSolutionProjectsViewModel
 {
-//    private readonly router: Router;
-//    private readonly solutionService: SolutionService;
-//    private searchDto: ListSolutionsDto;
-//
-//    private solutions: IPagedResult<Solution>;
-//
-//    constructor( router: Router, solutionService: SolutionService )
-//    {
-//        this.router = router;
-//        this.solutionService = solutionService;
-//        this.searchDto = {
-//            name: '',
-//            page: 1
-//        };
-//    }
-//
-//    private async activate(params)
-//    {
-//        this.solutions = await this.solutionService.listSolutions( this.searchDto );
-//    }
-//
-//    public addSolution(): void
-//    {
-//        this.router.navigate( 'add' );
-//    }
+    private readonly router: Router;
+    private readonly projectService: ProjectService;
+    private searchDto: ListProjectsDto;
+    private projects: IPagedResult<Project>;
+    private solutionId: string;
+
+    constructor( router: Router, projectService: ProjectService )
+    {
+        this.router = router;
+        this.projectService = projectService;
+        this.searchDto = {
+            name: '',
+            solution: '',
+            page: 1
+        };
+    }
+
+    private async activate( params )
+    {
+        this.solutionId = params.id;
+        this.searchDto.solution = params.id;
+        this.projects = await this.projectService.listProjects( this.searchDto );
+    }
+
+    public addProject(): void
+    {
+        this.router.navigateToRoute( 'projects-add', { id: 'abc123' } );
+    }
 }

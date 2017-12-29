@@ -7,6 +7,9 @@
     using Microsoft.Extensions.DependencyInjection;
     using System.IO;
     using System.Reflection;
+    using Common.Models;
+    using FluentValidation;
+    using FluentValidation.AspNetCore;
     using Infrastructure.Bootstrapping;
     using Infrastructure.Options;
     using Infrastructure.Routing;
@@ -24,7 +27,12 @@
         public IConfiguration Configuration { get; }
 
         /// <inheritdoc />
-        public Startup( IConfiguration configuration ) => Configuration = configuration;
+        public Startup( IConfiguration configuration )
+        {
+            Configuration = configuration;
+
+            ValidatorOptions.DisplayNameResolver = ValidatorOptions.PropertyNameResolver;
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices( IServiceCollection services )
@@ -61,6 +69,14 @@
                                      o.ConstraintMap.Add( "ObjectId", typeof( ObjectIdRouteConstraint ) );
                                  } );
             services.AddMvc()
+                    .AddFluentValidation( o =>
+                                          {
+                                              var webAssembly = GetType().Assembly;
+                                              var commonAssembly = typeof( VcsType ).Assembly;
+                                              o.ValidatorFactoryType = typeof( ServiceProviderValidatorFactory );
+                                              o.RegisterValidatorsFromAssembly( webAssembly );
+                                              o.RegisterValidatorsFromAssembly( commonAssembly );
+                                          } )
                     .AddJsonOptions( o =>
                                      {
                                          o.SerializerSettings.Formatting = Formatting.Indented;
