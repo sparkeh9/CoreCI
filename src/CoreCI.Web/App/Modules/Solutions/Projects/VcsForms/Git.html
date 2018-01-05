@@ -1,14 +1,11 @@
 ﻿<template>
-    <div class="form-group" >
+    <div class="form-group" validation-errors.bind="model.repositoryUrlErrors"  validate.bind="controller.validate" >
         <label for="cloneUrl" >Git repository URL</label>
         <input class="form-control"
+               id="abc123"
                class.bind="model.repositoryUrlErrors.length ? 'is-invalid' : ''"
                placeholder="Paste your clone URL here"
                type="text"
-               validation-errors.bind="model.repositoryUrlErrors"
-               value.bind="model.repositoryUrl & validate" >
-        <div if.bind="model.repositoryUrlErrors.length" class="invalid-feedback d-flex">
-            Please provide clone URL
-        </div>   
+               value.bind="model.repositoryUrl & validate:controller" >
     </div>
 </template>

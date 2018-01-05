@@ -1,33 +1,44 @@
 import { autoinject, bindable, bindingMode } from 'aurelia-framework';
-import { validationMessages, ValidationRules } from 'aurelia-validation';
+import { ControllerValidateResult, ValidationControllerFactory, ValidationController, validationMessages, ValidationRules, validateTrigger } from 'aurelia-validation';
 import { AddGitProjectDto } from '../../../../Models/Dto/projects/Vcs/AddGitProjectDto';
+import { IVcsViewModel } from './IVcsViewModel';
+import {BootstrapFormRenderer} from '../../../../Infrastructure/BootstrapFormRenderer';
 
 @autoinject
-export class GitViewModel
+export class GitViewModel implements IVcsViewModel
 {
+    private readonly controller: ValidationController;
+    public rules: any;
+
     @bindable( { defaultBindingMode: bindingMode.twoWay } )
     public model: AddGitProjectDto;
 
-    constructor()
+    constructor( controllerFactory: ValidationControllerFactory )
     {
         this.model = {
             repositoryUrl: ''
         };
+        this.controller = controllerFactory.createForCurrentScope();
+        
+        this.controller.addRenderer(new BootstrapFormRenderer());
+        this.controller.validateTrigger = validateTrigger.changeOrBlur;
         this.defineRules();
     }
-//
-//    public activate( activateModel )
-//    {
-//        this.model = activateModel;
-//    }
+
+    public async validate(): Promise<ControllerValidateResult>
+    {
+        return await this.controller.validate();
+    }
 
     private defineRules()
     {
         validationMessages[ 'IsRequired' ] = `\${$displayName} is required`;
-        ValidationRules
+        this.rules = ValidationRules
             .ensure( ( x: AddGitProjectDto ) => x.repositoryUrl )
             .required()
             .withMessageKey( 'IsRequired' )
-            .on( this.model );
+            .rules;
+
+        this.controller.addObject( this.model, this.rules );
     }
 }

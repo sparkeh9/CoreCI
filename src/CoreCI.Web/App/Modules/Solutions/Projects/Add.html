@@ -1,5 +1,5 @@
 ﻿<template>
-    <form submit.delegate="addSolution()" validate.bind="controller.validate" >
+    <form submit.delegate="addSolution()" >
         <div class="animated fadeIn" >
             <div class="row" >
                 <div class="col-lg-12 col-sm-12" >
@@ -10,25 +10,22 @@
             <div class="card" >
                 <div class="card-block" >
                     <div class="row" >
-                        <div class="col-lg-6" >
+                        <div class="col-lg-6 form-group" >
                             <div class="input-group input-group-lg" >
-                                <input class="form-control" id="search-church" placeholder="Project Name" type="text" value.bind="model.name & validate"  validation-errors.bind="nameErrors" class.bind="nameErrors.length ? 'is-invalid' : ''">
+                                <input class="form-control" placeholder="Project Name" type="text" value.bind="model.name & validate" validation-errors.bind="nameErrors" class.bind="nameErrors.length ? 'is-invalid' : ''" >
                             </div>
-                            <div if.bind="nameErrors.length" class="invalid-feedback d-flex">
-                                Please provide a Project name
-                            </div>   
                         </div>
                     </div>
                 </div>
             </div>
-            <aup-tabs tabs.bind="tabs" selected-tab.bind="selectedTab"></aup-tabs>
+            <aup-tabs tabs.bind="tabs" selected-tab.bind="selectedTab" ></aup-tabs>
             <aup-tab-content>
-                <aup-tab-pane selected-tab.bind="selectedTab" model.bind="vcsConfig" tab.bind="tabs.git" view-model.bind="viewmodels.git" ></aup-tab-pane>
-                <aup-tab-pane selected-tab.bind="selectedTab" model.bind="vcsConfig" tab.bind="tabs.svn" view-model.bind="viewmodels.svn" ></aup-tab-pane>
+                <aup-tab-pane selected-tab.bind="selectedTab" model.bind="vcsConfig" tab.bind="tabs.git" view-model.bind="tabs.git.viewModel" ></aup-tab-pane>
+                <aup-tab-pane selected-tab.bind="selectedTab" model.bind="vcsConfig" tab.bind="tabs.svn" view-model.bind="tabs.svn.viewModel" ></aup-tab-pane>
             </aup-tab-content>
 
         </div>
-        
+
         <button class="btn btn-primary" type="submit" >Add</button>
     </form>
 </template>

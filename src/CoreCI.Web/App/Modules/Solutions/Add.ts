@@ -36,7 +36,7 @@ export class AddSolutionViewModel
             return;
         }
 
-        let solution:Solution = await this.solutionService.addSolution( this.model );
+        const solution:Solution = await this.solutionService.addSolution( this.model );
         this.router.navigateToRoute('solution-projects', { id: solution.id }, { replace: true });
     }
 

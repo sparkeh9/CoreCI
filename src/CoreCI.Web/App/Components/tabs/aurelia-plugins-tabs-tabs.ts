@@ -44,17 +44,6 @@ export class Tabs
             }
         }
     }
-
-    public attached(thing)
-    {
-        console.log( thing );
-//        const active = this.tabs.find( tab => tab.active );
-//        if( !active )
-//        {
-//            return;
-//        }
-//        document.querySelector( `#${ active.id }` ).classList.add( 'active' );
-    }
     
     public click( event, tab )
     {
